@@ -37,7 +37,7 @@ xlabel('Depth(cm)')
 grid on;
 grid minor;
 exportgraphics(f,'IDD_fit.png','Resolution',600)
-%% time benchmark
+%% time benchmark 1 about 160s @i9-9900k
 load('head_idd.mat');
 num_bp = 2;
 tic;
@@ -48,3 +48,31 @@ parfor i = 1:size(z2d,1)
     x_out(:,i) = x;
 end
 toc;
+%% time benchmark 2 about 123.8s @i9-9900k
+load('electron_idd.mat');
+num_bp = 2;
+tic;
+x_out = zeros(num_bp*4,size(z2d,1));
+parfor i = 1:size(z2d,1)
+    idd_i = z2d(i,:)';
+    x = fast_fit(z',idd_i,num_bp);
+    x_out(:,i) = x;
+end
+toc;
+%% show results
+load('electron_idd.mat');
+num_bp = 2;
+c = lines();
+for i = 1674%1:size(z2d,1)
+    idd_i = z2d(i,:)';
+    x = fast_fit(z',idd_i,num_bp);
+    idd_o = bf_mex(z',x,'idd');
+    plot(z,idd_i,'Color',c(mod(i,256),:),'LineWidth',1);hold on
+    plot(z,idd_o,'-.','Color',c(mod(i,256),:),'LineWidth',1)
+end
+%%
+zrange = medfilt1(x_out(1,:),3)';
+[vo1] = protonspot2image(x_para,y_para,zrange);
+zrange = medfilt1(x_out(5,:),3)';
+[vo2] = protonspot2image(x_para,y_para,zrange);
+imagesc([vo1,vo2])
