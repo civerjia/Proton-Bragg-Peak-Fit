@@ -4,7 +4,7 @@ is_avx512 = 0;
 output_filename = 'pcf';
 src_path = './src/*.cpp';
 header_flag = ['-I','./includes/'];
-output_dir = '.';
+output_dir = '..';
 compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512);
 %%
 function compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512)
