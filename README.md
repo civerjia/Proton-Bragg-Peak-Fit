@@ -11,8 +11,13 @@ How to use:
 
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1)
 
-![[IDD_fit.png]]
+![Zebra IDD Fit](./Zebra_fit.png)
 
 It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
 
 It take 120s to fit 10498 IDD curves with 2 bragg peak model @i9-9900k
+
+Reference :
+- An analytical approximation of depth-dose distributions for therapeutic proton beams
+- E. Cojocaru. Parabolic Cylinder Functions (https://www.mathworks.com/matlabcentral/fileexchange/22620-parabolic-cylinder-functions)
+
