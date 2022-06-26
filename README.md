@@ -5,6 +5,7 @@
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB
 
 How to use:  
+- If your can run the first statement in Windows, do nothing. If you can't, run ./src/compile.m
 - `output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')`
 - `[x,idd_o] = precise_fit(z,idd_i,num_bp,strict);`
 - `x = fast_fit(z,idd_i,num_bp);`
