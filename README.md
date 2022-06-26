@@ -12,10 +12,10 @@ How to use:
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1)
 
 Zebra data:
-![Zebra IDD Fit](./Zebra_fit.png | width=256)
+![Zebra IDD Fit](./Zebra_fit.png | width=512px)
 
 Multi-Bragg Peaks Fit:
-![Multi BP Fit](./IDD_fit.png | width=256)
+![Multi BP Fit](./IDD_fit.png | width=512px)
 
 It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
 
