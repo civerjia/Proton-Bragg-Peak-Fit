@@ -2,7 +2,7 @@
 
 - Provide 3 different IDD measurement data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
-- Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB
+- Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
 
 How to use:  
 - If your can run the first statement in Windows, do nothing. If you can't, run ./src/compile.m
