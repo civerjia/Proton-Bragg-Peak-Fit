@@ -41,7 +41,7 @@ D(z) \;\; R_0 - 10\sigma\le z\le R_0+5\sigma \\
 \end{align}
 $$
 
-z denotes the depth in cm. there are 4 parameters in bortfeld funtion $R_0, \sigma, \epsilon, \Phi_0$ and we can guess a good initial points from the table provided by bortfeld.
+z denotes the depth in cm. there are 4 parameters in bortfeld funtion $R_0, \sigma, \epsilon, \Phi_0$ and we can guess a initial points from the table provided by bortfeld.
 ```
 z = (1:64)*0.291; % depth in cm
 [vmax,idx] = maxk(idd,k);
