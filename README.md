@@ -3,7 +3,7 @@
 
 - Provide 3 different IDD measurement data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
-- Input Integral Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1], buut it's ok to fit raw data in any scale
+- Input Integral Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1], but it's ok to fit raw data in any scale
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
 
 How to use:  
