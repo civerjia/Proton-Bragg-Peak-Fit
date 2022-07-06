@@ -28,6 +28,7 @@ It take 120s to fit 10498 IDD curves with 2 bragg peak model @i9-9900k
 Brief introduction:
 
 Bortfeld function is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
+
 $$
 \begin{align}
 
@@ -40,6 +41,7 @@ D(z) \;\; R_0 - 10\sigma\le z\le R_0+5\sigma \\
 \end{cases}
 \end{align}
 $$
+
 z denotes the depth in cm. there are 4 parameters in bortfeld funtion $R_0, \sigma, \epsilon, \Phi_0$ and we can guess a good initial points from the table provided by bortfeld.
 ```
 z = (1:64)*0.291; % depth in cm
@@ -52,6 +54,7 @@ sigma = sqrt((0.012*R0^0.935)^2 + (0.01*E0)^2*(alpha*p*E0^(p-1))^2);
 epsilon = 1e-3;
 ```
 The depth-dose distribution in water is given by $\hat D_{H_2O}(z)$ and $D_{H_2O}(z)$:
+
 $$
 \begin{align}
 \hat D_{H_2O}(z) &= \frac{\Phi_0}{1+0.012R_0}\left[17.93(R_0-z)^{-0.435}+\left(0.444+31.7\frac{\epsilon}{R_0}\right)(R_0-z)^{0.565} \right]\\
@@ -62,6 +65,7 @@ D_{H_2O}(z) &= \Phi_0\frac{e^{-\frac{(R_0-z)^2}{4\sigma^2}}\sigma^{0.565}}{1+0.0
 
 \end{align}
 $$
+
 $\mathfrak{D}_{a}(x)$ is a [parabolic cylinder function](https://mathworld.wolfram.com/ParabolicCylinderFunction.html) defined in Eq.33
 We can get $\mathfrak{D}_{a}(x)=\mathit{U}(-a-0.5,x)$ , this function is defined in https://github.com/civerjia/Parabolic-Cylinder-Functions-C-
 
