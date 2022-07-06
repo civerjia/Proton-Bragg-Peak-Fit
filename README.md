@@ -3,6 +3,7 @@
 
 - Provide 3 different IDD measurement data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
+- Input Integrated Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1]
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
 
 How to use:  
@@ -43,13 +44,21 @@ $$
 z denotes the depth in cm. there are 4 parameters in bortfeld funtion $R_0, \sigma, \epsilon, \Phi_0$ and we can guess a good initial points from the table provided by bortfeld.
 ```
 z = (1:64)*0.291; % depth in cm
-[vmax,idx] = max(idd);
+[vmax,idx] = maxk(idd,k);
 R0 = z(idx);% Range
 alpha = 0.0022;
 p = 1.77;
-E0 = (R0/alpha)^(1/p);% estimated proton energy
-sigma = sqrt((0.012*R0^0.935)^2 + (0.01*E0)^2*(alpha*p*E0^(p-1))^2);
+E0 = (R0./alpha).^(1/p);% estimated proton energy
+sigma = sqrt((0.012.*R0.^0.935).^2 + (0.01.*E0).^2.*(alpha.*p.*E0.^(p-1)).^2);
 epsilon = 1e-3;
+Phi = zv.*zr.*epsilon;
+```
+or use the simple version
+```
+R0 = z(idx);% Range
+sigma = 0.07*zr;
+epsilon = 1e-3;
+Phi = zv.*zr.*1e-2;
 ```
 The depth-dose distribution in water is given by $\hat D_{H_2O}(z)$ and $D_{H_2O}(z)$:
 
