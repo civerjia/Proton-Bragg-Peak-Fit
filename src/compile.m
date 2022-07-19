@@ -1,7 +1,7 @@
 use_openmp = 1;
 use_avx = 1;
 is_avx512 = 0;
-output_filename = 'pcf';
+output_filename = 'BortfeldFunction';
 src_path = './src/*.cpp';
 header_flag = ['-I','./includes/'];
 output_dir = '..';
@@ -19,9 +19,21 @@ avx512 = is_avx512 & use_avx;
 if use_openmp
     if ismac
         % Code to run on Mac platformmex 
-        cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
-        LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -fopenmp -O3"';
-        mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,src_path,header_flag);
+        [~,cpu_info] = system("sysctl -n machdep.cpu.brand_string");
+        if contains(cpu_info,'Apple')
+            disp('Apple Silicon Mac');
+            cpp_openmp_flag = 'CXXFLAGS="$CXXFLAGS -Xclang -fopenmp"';
+            cpp_lib_flag = 'LDFLAGS="$LDFLAGS -lomp"';
+            cpp_optim_flag = 'CXXOPTIMFLAGS="$CXXOPTIMFLAGS -Xclang -fopenmp"';
+            LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -Xclang -fopenmp -O3"';
+            openmp_path = '-I/usr/local/include';
+            mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,cpp_lib_flag,cpp_optim_flag,LinkerOptimizationFlags,openmp_path,src_path,header_flag);
+        else
+            disp('Intel Mac');
+            cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
+            LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -fopenmp -O3"';
+            mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,src_path,header_flag);
+        end
     elseif isunix
         % Code to run on Linux platform
         cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
