@@ -5,6 +5,8 @@
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
 - Input Integral Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1], but it's ok to fit raw data in any scale
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
+- Support Apple Silicon (Matlab R2022a, Matlab R2022a beta don't have toolboxs)
+- Image Processing Toolbox and Signal Processing Toolbox required
 
 How to use:  
 - If your can run the first statement in Windows, do nothing. If you can't, run ./src/compile.m
@@ -26,7 +28,7 @@ It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
 
 It take 120s to fit 10498 IDD curves with 2 bragg peak model @i9-9900k
 
-Brief introduction:
+Brief introduction (formula will be displayed in github : https://github.com/civerjia/Proton-Bragg-Peak-Fit):
 
 Bortfeld function is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
 
