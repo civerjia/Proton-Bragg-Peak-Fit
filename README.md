@@ -9,6 +9,7 @@
 - Image Processing Toolbox, Optimization Toolbox and Signal Processing Toolbox required
 
 Remark:
+M1 mac openmp issue: https://www.mathworks.com/matlabcentral/answers/1761950-m1-mac-compile-mex-file-with-openmp?s_tid=srchtitle
 
 Matlab R2022a thread safty is not very stable, if the mex function crashed matlab, run the magic function 'test3_mex.mexmaci64' by calling `test3_mex(int32(16));`. Its output looks like
 ```
