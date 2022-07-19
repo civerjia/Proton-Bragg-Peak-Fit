@@ -8,6 +8,29 @@
 - Support Apple Silicon (Matlab R2022a, Matlab R2022a beta don't have toolboxs)
 - Image Processing Toolbox, Optimization Toolbox and Signal Processing Toolbox required
 
+Remark:
+
+Matlab R2022a thread safty is not very stable, if the mex function crashed matlab, run the magic function 'test3_mex.mexmaci64' by calling `test3_mex(int32(16));`. Its output looks like
+```
+i = 1 
+i = 2 
+i = 7 
+i = 8 
+i = 5 
+i = 6 
+i = 3 
+i = 4 
+i = 9 
+i = 10 
+i = 13 
+i = 11 
+i = 14 
+i = 15 
+i = 12 
+i = 16 
+```
+Matlab R2022a beta works well with openmp but it do not support official toolbox.
+
 How to use:  
 - If your can run the first statement in Windows, do nothing. If you can't, run ./src/compile.m
 - `output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')`
