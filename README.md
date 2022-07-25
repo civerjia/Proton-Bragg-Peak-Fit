@@ -119,6 +119,8 @@ $$
 \\
 \end{align}
 $$
+
+
 $$
 \begin{align}
 \frac{\partial D}{\partial R_0} &=
