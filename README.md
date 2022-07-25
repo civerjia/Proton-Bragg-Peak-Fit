@@ -100,7 +100,7 @@ $\mathfrak{D}(a,x)$, is a [parabolic cylinder function](https://mathworld.wolfra
 Parameters of a single bortfeld function is a 4-element 1d array, $[R_0,\sigma,\epsilon,\Phi_0]$,  n-bortfeld function is a $4n$ 1d array,$[R_1,\sigma_1,\epsilon_1,\Phi_1,R_2,\sigma_2,\epsilon_2,\Phi_2,\cdots,R_n,\sigma_n,\epsilon_n,\Phi_n]$.
 
 Gradients:
-
+$$
 \begin{align}
 \frac{\partial\hat D}{\partial R_0} &= 
 \frac{\Phi_0 \left(-\frac{31.7 \epsilon (R_0-z)^{0.565}}{R_0^2}+\frac{0.565 \left(\frac{31.7 \epsilon}{R_0}+0.444\right)}{(R_0-z)^{0.435}}-\frac{7.79955}{(R_0-z)^{1.435}}\right)}{0.012 R_0+1}\\
@@ -141,6 +141,7 @@ f^{(1,0)}\left(x,a\right) &=
 \\
 
 \end{align}
+$$
 
 Reference :
 - An analytical approximation of the Bragg curve for therapeutic proton beams
