@@ -132,7 +132,7 @@ f\left(\frac{z-R_0}{\sigma},a\right) &=
 \mathfrak{D}_{a}(\frac{z-R_0}{\sigma})
 \\
 f^{(1,0)}\left(x,a\right) &= 
-\frac{\mathfrak{D}_{a}(x)}{\partial x}
+\frac{\partial \mathfrak{D}_{a}(x)}{\partial x}
 \\
 \end{align}
 $$
