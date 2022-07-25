@@ -100,6 +100,7 @@ $\mathfrak{D}(a,x)$, is a [parabolic cylinder function](https://mathworld.wolfra
 Parameters of a single bortfeld function is a 4-element 1d array, $[R_0,\sigma,\epsilon,\Phi_0]$,  n-bortfeld function is a $4n$ 1d array,$[R_1,\sigma_1,\epsilon_1,\Phi_1,R_2,\sigma_2,\epsilon_2,\Phi_2,\cdots,R_n,\sigma_n,\epsilon_n,\Phi_n]$.
 
 Gradients:
+
 $$
 \begin{align}
 \frac{\partial\hat D}{\partial R_0} &= 
