@@ -19,21 +19,37 @@
 ## Linux and MacOS
 - run `./src/compile_PBPF.m`
   
+## 1D IDD data
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be case fuls, run the demo section by section, some parts are time comsuming.
 
-Zebra data:
+Zebra data            |  other MLIC data
+:-------------------------:|:-------------------------:
+<img src="./images/Zebra_fit.png" width="200" height="200"> |  <img src="./images/IDD_fit.png" width="200" height="200">
 
-<img src="./images/Zebra_fit.png" width="300" height="200">
+Simulation data `idds.mat` , proton energy at 25:1:180 MeV
+<img src="./images/idds.png" width="500" height="200">
+## 3D proton dose
+1D IDD is good enough for QA purpose, but for proton radiography, a analytic 3D dose distribution function could be usefull.
 
-Multi-Bragg Peaks Fit:
+A typical 3D scenario, with range shifter, phantom and water tank(Detector).
 
-<img src="./images/IDD_fit.png" width="300" height="200">
+<img src="./images/MLSIC3d_scenario.png" width="500" height="300">
+A good 3D function is required to fit the 3D dose. the xy dose can be modeled by a 2D mixture gaussian model(for complicate cases), and z dose is modeled by bortfeld function(BF). 
 
-It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
+$f(x,y,z) = BF(z)*Gauss(x,y)$
 
-It take 120s to fit 10498 IDD curves with 2 bragg peak model @i9-9900k
+For a simple 3D water dose, 110MeV proton(simulation data):
+<img src="./images/E110.24.png" width="500" height="500">
 
-Brief introduction (formula will be displayed in github : https://github.com/civerjia/Proton-Bragg-Peak-Fit):
+Related function will be uploaded later.
+
+
+### Benchmark
+- It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
+- It take 120s to fit 10498 IDD curves with 2 bragg peak model @i9-9900k
+
+## Brief introduction of math
+(formula will be displayed in github : https://github.com/civerjia/Proton-Bragg-Peak-Fit):
 
 Bortfeld function is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
 
@@ -118,11 +134,11 @@ f^{(1,0)}\left(x,a\right) &=
 \end{align}
 $$
 
-Reference :
+# Reference :
 - An analytical approximation of the Bragg curve for therapeutic proton beams
 - E. Cojocaru. Parabolic Cylinder Functions (https://www.mathworks.com/matlabcentral/fileexchange/22620-parabolic-cylinder-functions)
 
-Remark:
+# Remark:
 M1 mac openmp issue: https://www.mathworks.com/matlabcentral/answers/1761950-m1-mac-compile-mex-file-with-openmp?s_tid=srchtitle
 
 Matlab R2022a thread safty is not very stable, if the mex function crashed matlab, run the magic function 'test3_mex.mexmaci64' by calling `test3_mex(int32(16));`. Its output looks like
