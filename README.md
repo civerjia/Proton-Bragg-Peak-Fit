@@ -38,8 +38,14 @@ A good 3D function is required to fit the 3D dose. the xy dose can be modeled by
 
 $f(x,y,z) = BF(z)*Gauss(x,y)$
 
+The area of gauss function(2D integral) = 1. It's a very good property, $BF(z_0)$ give us the Integral depth dose at $z_0$ which is the area of this 2D slice.
+
 For a simple 3D water dose, 110MeV proton(simulation data):
 <img src="./images/E110.24.png" width="500" height="500">
+
+Fitting 3D dose comprise 2 steps,
+- Fitting 1D IDD curve
+- Fitting 2D dose with gaussian functions layer by layer
 
 Related function will be uploaded later.
 
