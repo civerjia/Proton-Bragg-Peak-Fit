@@ -1,4 +1,10 @@
 function [vo] = protonspot2image(x_para,y_para,zrange)
+    % input -> unit is mm for xy , z is a.u.
+    % x_para : gaussian parameter (A,mu,sigma), determine the proton spot location
+    % y_para : gaussian parameter (A,mu,sigma), determine the proton spot location
+    % z_range : proton range in z axis
+    % return ->
+    % vo     : 2D image of proton range map
     xloc = linspace(-100,100,100)-1;
     yloc = linspace(-100,100,100)-2;
     [Xloc,Yloc] = meshgrid(xloc,yloc);

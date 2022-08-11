@@ -1,52 +1,33 @@
 # Proton Bragg Peak Fit
 [![View Fit Proton Bragg Peaks on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/100516-fit-proton-bragg-peaks)
 
-- Provide 3 different IDD measurement data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
+- Provide IDD measurement data and simulation data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
 - Input Integral Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1], but it's ok to fit raw data in any scale
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
 - Support Apple Silicon (Matlab R2022a, Matlab R2022a beta don't have toolboxs)
 - Image Processing Toolbox, Optimization Toolbox and Signal Processing Toolbox required
 
-Remark:
-M1 mac openmp issue: https://www.mathworks.com/matlabcentral/answers/1761950-m1-mac-compile-mex-file-with-openmp?s_tid=srchtitle
 
-Matlab R2022a thread safty is not very stable, if the mex function crashed matlab, run the magic function 'test3_mex.mexmaci64' by calling `test3_mex(int32(16));`. Its output looks like
-```
-i = 1 
-i = 2 
-i = 7 
-i = 8 
-i = 5 
-i = 6 
-i = 3 
-i = 4 
-i = 9 
-i = 10 
-i = 13 
-i = 11 
-i = 14 
-i = 15 
-i = 12 
-i = 16 
-```
-Matlab R2022a beta works well with openmp but it do not support official toolbox.
 
-How to use:  
-- If your can run the first statement in Windows, do nothing. If you can't, run ./src/compile.m
+# How to use:  
+## windows
+- Pre-compiled functions are provided. If you can't, run `./src/compile_PBPF.m` Here are some code snippets
 - `output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')`
 - `[x,idd_o] = precise_fit(z,idd_i,num_bp,strict);`
 - `x = fast_fit(z,idd_i,num_bp);`
-
-Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1)
+## Linux and MacOS
+- run `./src/compile_PBPF.m`
+  
+Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be case fuls, run the demo section by section, some parts are time comsuming.
 
 Zebra data:
 
-<img src="./Zebra_fit.png" width="500" height="500">
+<img src="./images/Zebra_fit.png" width="300" height="200">
 
 Multi-Bragg Peaks Fit:
 
-<img src="./IDD_fit.png" width="500" height="500">
+<img src="./images/IDD_fit.png" width="300" height="200">
 
 It take 160s to fit 11057 IDD curves with 2 bragg peak model @i9-9900k
 
@@ -141,3 +122,26 @@ Reference :
 - An analytical approximation of the Bragg curve for therapeutic proton beams
 - E. Cojocaru. Parabolic Cylinder Functions (https://www.mathworks.com/matlabcentral/fileexchange/22620-parabolic-cylinder-functions)
 
+Remark:
+M1 mac openmp issue: https://www.mathworks.com/matlabcentral/answers/1761950-m1-mac-compile-mex-file-with-openmp?s_tid=srchtitle
+
+Matlab R2022a thread safty is not very stable, if the mex function crashed matlab, run the magic function 'test3_mex.mexmaci64' by calling `test3_mex(int32(16));`. Its output looks like
+```
+i = 1 
+i = 2 
+i = 7 
+i = 8 
+i = 5 
+i = 6 
+i = 3 
+i = 4 
+i = 9 
+i = 10 
+i = 13 
+i = 11 
+i = 14 
+i = 15 
+i = 12 
+i = 16 
+```
+Matlab R2022a beta works well with openmp but it do not support official toolbox.
