@@ -20,7 +20,7 @@
 - run `./src/compile_PBPF.m`
   
 ## 1D IDD data
-Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be case fuls, run the demo section by section, some parts are time comsuming.
+Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be caseful, run the demo section by section, some parts are time comsuming.
 
 Zebra data            |  other MLIC data
 :-------------------------:|:-------------------------:
