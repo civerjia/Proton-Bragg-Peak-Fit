@@ -27,6 +27,7 @@ Zebra data            |  other MLIC data
 <img src="./images/Zebra_fit.png" width="200" height="200"> |  <img src="./images/IDD_fit.png" width="200" height="200">
 
 Simulation data `idds.mat` , proton energy at 25:1:180 MeV
+
 <img src="./images/idds.png" width="500" height="200">
 ## 3D proton dose
 1D IDD is good enough for QA purpose, but for proton radiography, a analytic 3D dose distribution function could be usefull.
@@ -34,9 +35,10 @@ Simulation data `idds.mat` , proton energy at 25:1:180 MeV
 A typical 3D scenario, with range shifter, phantom and water tank(Detector).
 
 <img src="./images/MLSIC3d_scenario.png" width="500" height="300">
+
 A good 3D function is required to fit the 3D dose. the xy dose can be modeled by a 2D mixture gaussian model(for complicate cases), and z dose is modeled by bortfeld function(BF). 
 
-$f(x,y,z) = BF(z)*Gauss(x,y)$
+$$f(x,y,z) = BF(z)*Gauss(x,y)$$
 
 The area of gauss function(2D integral) = 1. It's a very good property, $BF(z_0)$ give us the Integral depth dose at $z_0$ which is the area of this 2D slice.
 
