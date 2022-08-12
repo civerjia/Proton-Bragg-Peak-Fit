@@ -42,6 +42,7 @@ if use_openmp
         end
     elseif isunix
         % Code to run on Linux platform
+        disp('Unix');
         cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
         LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -fopenmp -O3"';
         if use_avx
@@ -56,7 +57,7 @@ if use_openmp
         mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,avx_flag,src_path,header_flag);
     elseif ispc
         % Code to run on Windows platform
-        warning('Compiler should be Visual Studio on Windows!');
+        disp('Windows');
         cpp_openmp_flag = 'COMPFLAGS="$COMPFLAGS /openmp"';
         if use_avx
             % visual studio is using /arch:AVX2 or /arch:AVX512
