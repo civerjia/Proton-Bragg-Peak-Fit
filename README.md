@@ -22,28 +22,56 @@
 ## 1D IDD data
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be caseful, run the demo section by section, some parts are time comsuming.
 
+<center>
+
 Zebra data            |  other MLIC data
 :-------------------------:|:-------------------------:
 <img src="./images/Zebra_fit.png" width="200" height="200"> |  <img src="./images/IDD_fit.png" width="200" height="200">
 
+</center>
+
 Simulation data `idds.mat` , proton energy at 25:1:180 MeV
 
+<p align="center">
 <img src="./images/idds.png" width="500" height="200">
+</p>
 ## 3D proton dose
 1D IDD is good enough for QA purpose, but for proton radiography, a analytic 3D dose distribution function could be usefull.
 
 A typical 3D scenario, with range shifter, phantom and water tank(Detector).
 
+<p align="center">
 <img src="./images/MLSIC3d_scenario.png" width="500" height="300">
+</p>
 
 A good 3D function is required to fit the 3D dose. the xy dose can be modeled by a 2D mixture gaussian model(for complicate cases), and z dose is modeled by bortfeld function(BF). 
 
-$$f(x,y,z) = BF(z)*Gauss(x,y)$$
+$$
+\begin{align}
+f(x,y,z) &= BF(z)*G(x,y)\\
+f_{\bf X}(x,y) &= \frac{A}{2\pi\sqrt{|\Sigma|}} e^{-\frac{1}{2}\left((\textbf{X}-\mu)^T\Sigma^{-1}(\textbf{X}-\mu)\right)}
+\end{align}
+$$
 
-The area of gauss function(2D integral) = 1. It's a very good property, $BF(z_0)$ give us the Integral depth dose at $z_0$ which is the area of this 2D slice.
+The area(2D integral) of gauss function $\int\int f_{\bf X}(x,y;A=1) dxdy$ = 1. It's a very good property, that means the 2D dose function has area = A. Integral depth dose(IDD) at $z_0$ also give us the total dose of this 2D slice, therefore we have $BF(z_0) = A$.
+
+The 3D dose function:
+
+$$
+\begin{align}
+f(x,y,z) &= BF(z;R,\sigma,\epsilon,\Phi)*G(x,y;\mu,\Sigma)\\
+ &= \frac{BF(z;R,\sigma,\epsilon,\Phi)}{2\pi\sqrt{|\Sigma|}} e^{-\frac{1}{2}\left((\textbf{X}-\mu)^T\Sigma^{-1}(\textbf{X}-\mu)\right)}\\
+f(x,y,z) &= BF(z;R,\sigma,\epsilon,\Phi)*\sum_{i=1}^{N}G(x,y;\mu_i,\Sigma_i)\\
+ &= BF(z;R,\sigma,\epsilon,\Phi)\sum_{i=1}^{N}\frac{a_i}{2\pi\sqrt{|\Sigma_i|}} e^{-\frac{1}{2}\left((\textbf{X}-\mu_i)^T\Sigma_{i}^{-1}(\textbf{X}-\mu_i)\right)}\\
+ & \sum_{i=1}^N a_i = 1 \quad \forall a_i\in[0,1] 
+\end{align}
+$$
 
 For a simple 3D water dose, 110MeV proton(simulation data):
+
+<p align="center">
 <img src="./images/E110.24.png" width="500" height="500">
+</p>
 
 Fitting 3D dose comprise 2 steps,
 - Fitting 1D IDD curve
@@ -65,9 +93,9 @@ $$
 \begin{align}
 D(z) \approx 
 \begin{cases}
-\hat{D}(z) \;\;z < R_0 - 10\sigma\\
-D(z) \;\; R_0 - 10\sigma\le z\le R_0+5\sigma \\
-0 \;\; otherwise
+\hat{D}(z) \quad z < R_0 - 10\sigma\\
+D(z)  \quad R_0 - 10\sigma\le z\le R_0+5\sigma \\
+0  \quad  otherwise
 \end{cases}
 \end{align}
 $$
