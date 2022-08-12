@@ -28,7 +28,7 @@ if use_openmp
             LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -Xclang -fopenmp -O3"';
             openmp_path = '-I/usr/local/include';
             mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,cpp_lib_flag,cpp_optim_flag,LinkerOptimizationFlags,openmp_path,src_path,header_flag);
-            [~,arch] = system('arch')
+            [~,arch] = system('arch');
             if ~contains(arch,'arm64')
                 % call magic function, this function can stablize openmp in Apple Rosseta 2
                 disp('Rosseta2 Matlab, test openmp')
@@ -36,14 +36,14 @@ if use_openmp
             end
         else
             disp('Intel Mac');
-            cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
+            cpp_openmp_flag = 'CXXFLAGS="$CXXFLAGS -fopenmp"';
             LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -fopenmp -O3"';
             mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,src_path,header_flag);
         end
     elseif isunix
         % Code to run on Linux platform
         disp('Unix');
-        cpp_openmp_flag = "CXXFLAGS='$CXXFLAGS -fopenmp'";
+        cpp_openmp_flag = 'CXXFLAGS="$CXXFLAGS -fopenmp"';
         LinkerOptimizationFlags = 'LDOPTIMFLAGS="$LDOPTIMFLAGS -fopenmp -O3"';
         if use_avx
             if avx512
@@ -54,7 +54,7 @@ if use_openmp
         else
             avx_flag = '';
         end
-        mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,avx_flag,src_path,header_flag);
+        mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,avx_flag,header_flag,src_path);
     elseif ispc
         % Code to run on Windows platform
         disp('Windows');
