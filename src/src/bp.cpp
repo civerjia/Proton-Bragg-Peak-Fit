@@ -57,7 +57,7 @@ double BP::Bragg(double z, double r, double s, double e, double p)
 void BP::IDD_array(double* depth, double* dose_o, int size, double R0, double sigma, double epsilon, double Phi)
 {
 #pragma omp parallel for
-    for (int i{ 0 }; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         *(dose_o + i) = BP::IDD(depth[i], R0, sigma, epsilon, Phi);
     }
@@ -65,7 +65,7 @@ void BP::IDD_array(double* depth, double* dose_o, int size, double R0, double si
 void BP::IDD_array_v2(double* depth, double* dose_o, int size, double R0, double sigma, double epsilon, double Phi, double a, double b, double c, double d)
 {
 #pragma omp parallel for
-    for (int i{ 0 }; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         *(dose_o + i) = BP::IDDV2(depth[i], R0, sigma, epsilon, Phi, a, b, c, d);
     }
@@ -114,10 +114,10 @@ void BP::grad_array(double* z, double* grad_o, int size, double* para)
 
     double grad4[4]{};
 
-    for (int i{ 0 }; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         BP::grad(z[i], grad4, para[0], para[1], para[2], para[3]);
-        for (int j{ 0 }; j < 4; ++j)
+        for (int j = 0; j < 4; ++j)
         {
             grad_o[j + i * 4] = grad4[j];
         }
@@ -127,7 +127,7 @@ double norm_l2(double* data1, double* data2, int size)
 {
     double val{ 0.0 };
 #pragma omp parallel for reduction(+:val)
-    for (int i{ 0 }; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         val += (data1[i] - data2[i]) * (data1[i] - data2[i]);
     }
@@ -138,13 +138,13 @@ inline void update_gradient(int size, double* z, double* dose, double* idd_dose,
 {
     double dose_diff{};
     std::vector<double> grad4(4);
-    for (std::size_t i{ 0 }; i < size; ++i)
+    for (std::size_t i = 0; i < size; ++i)
     {
         dose_diff = idd_dose[i] - dose[i];
         // get gradient 
         BP::grad(z[i], grad4.data(), para[0], para[1], para[2], para[3]);
         // calculate the batch mean of gradient
-        for (std::size_t j{ 0 }; j < 4; ++j)
+        for (std::size_t j = 0; j < 4; ++j)
         {
             *(grad4_o + j) += grad4[j] * dose_diff / double(size);
         }
@@ -165,18 +165,18 @@ void BP::fitBragg(double* z, double* dose, int size, double* para, double* lambd
     BP::IDD_array(z, idd_dose.data(), size, para[0], para[1], para[2], para[3]);
     Lmin = 0.5 * norm_l2(dose, idd_dose.data(), size);
 
-    for (int j{ 0 }; j < 4; ++j)
+    for (int j = 0; j < 4; ++j)
     {
         para_best[j] = para[j];
     }
     para0 = para_best;
     para1 = para_best;
     para2 = para_best;
-    for (int i{ 0 }; i < niter; ++i)
+    for (int i = 0; i < niter; ++i)
     {
         // accelerated gradient method
         t1 = (1.0 + std::sqrt(1.0 + 4.0 * t0 * t0)) / 2.0;
-        for (int j{ 0 }; j < 4; ++j)
+        for (int j = 0; j < 4; ++j)
         {
             s[j] = para1[j] + (para1[j] - para0[j]) * (t0 - 1.0) / t1;
         }
@@ -185,7 +185,7 @@ void BP::fitBragg(double* z, double* dose, int size, double* para, double* lambd
         std::vector<double> grad4(4);
         update_gradient(size, z, dose, idd_dose.data(), grad4.data(), s.data());
         // gradient descent
-        for (int j{ 0 }; j < 4; ++j)
+        for (int j = 0; j < 4; ++j)
         {
             double temp{ s[j] - lambda[j] * grad4[j] };
             // positive proximal projection
@@ -210,11 +210,11 @@ void BP::fitBragg(double* z, double* dose, int size, double* para, double* lambd
             Lmin = L;
         }
     }
-    for (int j{ 0 }; j < 4; ++j)
+    for (int j = 0; j < 4; ++j)
     {
         para_o[j] = para_best[j];
     }
-    for (int j{ 0 }; j < size; ++j)
+    for (int j = 0; j < size; ++j)
     {
         idd_o[j] = idd_dose[j];
     }
