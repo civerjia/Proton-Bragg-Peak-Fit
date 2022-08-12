@@ -12,12 +12,13 @@
 
 # How to use:  
 ## windows
-- Pre-compiled functions are provided. If you can't, run `./src/compile_PBPF.m` Here are some code snippets
+- Pre-compiled functions are provided. If it doesn't work, run `./src/compile_PBPF.m` Here are some code snippets
 - `output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')`
 - `[x,idd_o] = precise_fit(z,idd_i,num_bp,strict);`
 - `x = fast_fit(z,idd_i,num_bp);`
 ## Linux and MacOS
-- run `./src/compile_PBPF.m`
+- run `./src/compile_PBPF.m` to compile it
+- same as above
   
 ## 1D IDD data
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be caseful, run the demo section by section, some parts are time comsuming.
@@ -27,7 +28,6 @@ Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1).
 Zebra data            |  other MLIC data
 :-------------------------:|:-------------------------:
 <img src="./images/Zebra_fit.png" width="200" height="200"> |  <img src="./images/IDD_fit.png" width="200" height="200">
-
 </center>
 
 Simulation data `idds.mat` , proton energy at 25:1:180 MeV
@@ -35,6 +35,7 @@ Simulation data `idds.mat` , proton energy at 25:1:180 MeV
 <p align="center">
 <img src="./images/idds.png" width="500" height="200">
 </p>
+
 ## 3D proton dose
 1D IDD is good enough for QA purpose, but for proton radiography, a analytic 3D dose distribution function could be usefull.
 
