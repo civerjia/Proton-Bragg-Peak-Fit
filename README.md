@@ -26,7 +26,7 @@
 ## Compilation
 - Open the root folder run `cd('./src')` in matlab
 - run `compile_PBPF` three compile flags are provided
-    - use_openmp = 1; Use OpenMp
+    - use_openmp = 1; Use OpenMP
     - use_avx = 1;    Use AVX2
     - is_avx512 = 0;  Use AVX512
 ## Here are some code snippets
