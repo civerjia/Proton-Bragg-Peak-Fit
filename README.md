@@ -28,7 +28,7 @@
 - run `compile_PBPF` three compile flags are provided
     - use_openmp = 1; Use OpenMP
     - use_avx = 1;    Use AVX2
-    - is_avx512 = 0;  Use AVX512
+    - is_avx512 = 1;  Use AVX512 (not every CPU support this)
 ## Here are some code snippets
 - predict IDD with depth and bf parameters
 ```matlab
