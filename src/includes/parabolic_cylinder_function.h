@@ -46,6 +46,25 @@ namespace PCF
 	T call_pcf_name(T a, T x, int idx);
 	template <class T>
 	void call_pcf_name_array(T a, T* x, int idx, int x_size, T* val);
+
+	template <class T>
+	T PCF::get_eps()
+}
+
+template <class T>
+T PCF::get_eps()
+{
+	if(sizeof(T) == 4)
+	{
+		return 1e-7f;
+	}
+	else if (sizeof(T) == 8)
+	{
+		return 1e-15;
+	}
+	else{
+		return 0;
+	}
 }
 
 // implementation
@@ -75,7 +94,7 @@ T PCF::pu(T a, T x)
     //% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     std::array<T, 101> c;
     std::array<T, 101> d;
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T sqpi{ std::sqrt(M_PI) };
     T c0{ 1.0 }, c1{ a };
     c[0] = a;
@@ -159,7 +178,7 @@ T PCF::dpu(T a, T x)
     //% ================================================================== =
     std::array<T, 101> c;
     std::array<T, 101> d;
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T sqpi{ std::sqrt(M_PI) };
     T c0{ 1.0 }, c1{ a };
     c[0] = a;
@@ -244,7 +263,7 @@ T PCF::pulx(T a, T x)
     //% Routine called :
     //% 'pvlx' for computing V(a, x) for large | x |
     //% ================================================================== =
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T qe{ std::exp(-x * x / 4.0) };
     T a0{ qe * std::pow(std::abs(x),(-a - 0.5)) };
     T r{ 1.0 }, u{ 1.0 };
@@ -287,7 +306,7 @@ T PCF::dpulx(T a, T x)
     //% Routine called :
     //% 'dpvlx' for computing V'(a,x) for large |x|
     //% ================================================================== =
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T x1{ std::abs(x) };
     T qe{ std::exp(-x1 * x1 / 4.0) };
     T q0{ std::pow(x1, (-a - 0.5)) };
@@ -335,7 +354,7 @@ T PCF::pv(T a, T x)
     //% ================================================================== =
     std::array<T, 101> c;
     std::array<T, 101> d;
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T sqpi{ std::sqrt(M_PI) };
     T c0{ 1.0 }, c1{ a };
     c[0] = a;
@@ -415,7 +434,7 @@ T PCF::dpv(T a, T x)
     % ================================================================== =*/
     std::array<T, 101> c;
     std::array<T, 101> d;
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T sqpi{ std::sqrt(M_PI) };
     T c0{ 1.0 }, c1{ a };
     c[0] = a;
@@ -496,7 +515,7 @@ T PCF::pvlx(T a, T x)
     //% Routine called :
     //% 'pulx' for computing U(a, x) for large | x |
     //% ================================================================== =
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T x1{ std::abs(x) };
     T qe{ std::exp(x1 * x1 / 4.0) };
     T a0{ std::sqrt(M_2_PI) * qe * std::pow(x1,(a - 0.5)) };
@@ -541,7 +560,7 @@ T PCF::dpvlx(T a, T x)
     //% Routine called :
     //% 'dpulx' for computing U'(a,x) for large |x|
     //% ================================================================== =
-    T eps{ 1e-15 };
+    T eps = PCF::get_eps();
     T s0{ std::sqrt(M_2_PI) };
     T x1{ std::abs(x) };
     T qe{ std::exp(x1 * x1 / 4.0) };
