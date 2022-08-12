@@ -1,5 +1,5 @@
 
-load('zebra_idd.mat');
+load('./src/zebra_idd.mat');
 f = figure;
 c = lines();
 for i = 1:10
@@ -16,9 +16,9 @@ ylabel('Dose(a.u.)')
 xlabel('Depth(cm)')
 grid on;
 grid minor;
-exportgraphics(f,'Zebra_fit.png','Resolution',600)
+exportgraphics(f,'./images/Zebra_fit.png','Resolution',600)
 %%
-load('head_idd.mat');
+load('./src/head_idd.mat');
 idx = [214 454 1587 1724 4981];
 f = figure;
 c = lines();
@@ -36,9 +36,9 @@ ylabel('Dose(a.u.)')
 xlabel('Depth(cm)')
 grid on;
 grid minor;
-exportgraphics(f,'IDD_fit.png','Resolution',600)
+exportgraphics(f,'./images/IDD_fit.png','Resolution',600)
 %% time benchmark 1 about 160s @i9-9900k
-load('head_idd.mat');
+load('./src/head_idd.mat');
 num_bp = 2;
 tic;
 x_out = zeros(num_bp*4,size(z2d,1));
@@ -49,7 +49,7 @@ parfor i = 1:size(z2d,1)
 end
 toc;
 %% time benchmark 2 about 123.8s @i9-9900k
-load('electron_idd.mat');
+load('./src/electron_idd.mat');
 num_bp = 2;
 tic;
 x_out = zeros(num_bp*4,size(z2d,1));
@@ -60,7 +60,7 @@ parfor i = 1:size(z2d,1)
 end
 toc;
 %% show results
-load('electron_idd.mat');
+load('./src/electron_idd.mat');
 num_bp = 2;
 c = lines();
 for i = 1674%1:size(z2d,1)
