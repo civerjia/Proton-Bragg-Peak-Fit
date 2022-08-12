@@ -48,7 +48,7 @@ namespace PCF
 	void call_pcf_name_array(T a, T* x, int idx, int x_size, T* val);
 
 	template <class T>
-	T PCF::get_eps()
+	T PCF::get_eps();
 }
 
 template <class T>
