@@ -18,7 +18,7 @@
 
 ## Linux and MacOS
 - Pre-compiled functions are provided.
-    - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this)
+    - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this) **If you use this, change BortfeldFunction in bf_mex to BortfeldFunction_avx512f**
     - `BortfeldFunction.mexa64` Linux with avx2(supported by most of modern x86_64 CPU)
     - `BortfeldFunction.mexmaca64` for Apple Silicon Mac (do not Support AVX)
     - `BortfeldFunction.mexmacai64` for Intel Mac
