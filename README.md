@@ -28,7 +28,7 @@ Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1).
 
 Zebra data            |  other MLIC data
 :-------------------------:|:-------------------------:
-<img src="./images/Zebra_fit.png" width="200" height="200"> |  <img src="./images/IDD_fit.png" width="200" height="200">
+|<img src="./images/Zebra_fit.png" width="200" height="200">|   <img src="./images/IDD_fit.png" width="200" height="200">|
 </p>
 
 Simulation data `idds.mat` , proton energy at 25:1:180 MeV
