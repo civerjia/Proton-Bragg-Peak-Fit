@@ -12,13 +12,55 @@
 
 # How to use:  
 ## windows
-- Pre-compiled functions are provided. If it doesn't work, run `./src/compile_PBPF.m` Here are some code snippets
-- `output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')`
-- `[x,idd_o] = precise_fit(z,idd_i,num_bp,strict);`
-- `x = fast_fit(z,idd_i,num_bp);`
+- Pre-compiled functions are provided.
+    - `BortfeldFunction.mexw64` Windows with avx2(supported by most of modern x86_64 CPU).
+- If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
+
 ## Linux and MacOS
-- run `./src/compile_PBPF.m` to compile it
-- same as above
+- Pre-compiled functions are provided.
+    - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this)
+    - `BortfeldFunction.mexa64` Linux with avx2(supported by most of modern x86_64 CPU)
+    - `BortfeldFunction.mexmaca64` for Apple Silicon Mac (do not Support AVX)
+    - `BortfeldFunction.mexmacai64` for Intel Mac
+- If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
+## Compilation
+- Open the root folder run `cd('./src')` in matlab
+- run `compile_PBPF` three compile flags are provided
+    - use_openmp = 1; Use OpenMp
+    - use_avx = 1;    Use AVX2
+    - is_avx512 = 0;  Use AVX512
+## Here are some code snippets
+- predict IDD with depth and bf parameters
+```matlab
+z = (1:64)*0.3; % depth unit(cm), (n,1) size is preferred
+% bortfeld function parameters, [range1,sigma1,epsilon1,phi1, range2,sigma2,epsilon2,phi2] two bragg-peaks used here, range unit is cm
+bf_para = [15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4];
+% get idd curve, size of output will be (n,1), no matter z is (1,n) or (n,1)
+output = bf_mex(z,bf_para,'idd');
+plot(z,output);
+grid on;
+grid minor;
+xlabel('Depth(cm)');
+ylabel('Dose(a.u.)');% a.u. means arbitary unit
+% for short
+% output = bf_mex((1:64)*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'idd')
+```
+- Fit measured IDD
+```matlab
+% method 1
+[x,idd_o] = precise_fit(z,idd_i,num_bp,strict);
+% method 2 used for fast fit, don't calculate IDD in this function
+x = fast_fit(z,idd_i,num_bp);
+idd_o = bf_mex(z,x,'idd');
+```
+- Get gradient (Jacobian matrix) of Bortfeld function
+```matlab
+z = (1:64)*0.3; % depth unit(cm), (n,1) size is preferred
+% bortfeld function parameters, (m,1), range unit is cm
+bf_para = [15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4];
+% output size will be (n,m)
+output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
+```
   
 ## 1D IDD data
 Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be caseful, run the demo section by section, some parts are time comsuming.
