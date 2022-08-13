@@ -136,7 +136,7 @@ Related function will be uploaded later.
 
 ### 2D Gaussian
 
-We model the covariance matrix of bivariate normal function by 3 parameters $\sigma_1, \sigma_2, \beta$. The $\sigma$ denotes the standard deviation, and $\beta$ denotes the rotation of the coordinate. For convience, let $X = [x,y]^T$ and $\hat X = X - [\mu_1,\mu_2]^T$
+We model the covariance matrix of bivariate normal function by 6 parameters $a, \mu_1, \mu_2\sigma_1, \sigma_2, \beta$. The $\mu$ denotes the position, $\sigma$ denotes the standard deviation, and $\beta$ denotes the rotation of the coordinate. For convience, let $X = [x,y]^T$ and $\hat X = X - [\mu_1,\mu_2]^T$
 
 $$
 \begin{align}
