@@ -134,6 +134,76 @@ Related function will be uploaded later.
 ## Brief introduction of math
 (formula will be displayed in github : https://github.com/civerjia/Proton-Bragg-Peak-Fit):
 
+### 2D Gaussian
+
+We model the covariance matrix of bivariate normal function by 3 parameters $\sigma_1, \sigma_2, \beta$. The $\sigma$ denotes the standard deviation, and $\beta$ denotes the rotation of the coordinate. For convience, let $X = [x,y]^T$ and $\hat X = X - [\mu_1,\mu_2]^T$
+$$
+\begin{align}
+\Sigma &= \begin{bmatrix}
+\sigma_1^2 & 0\\
+0 & \sigma_2^2
+\end{bmatrix}\\
+\Sigma^{-1} &= \frac{1}{\sigma_1^2 \sigma_2^2}\begin{bmatrix}
+\sigma_2^2 & 0\\
+0 & \sigma_1^2
+\end{bmatrix}\\
+R &= \begin{bmatrix}
+cos\beta & -sin\beta\\
+sin\beta & cos\beta
+\end{bmatrix}\\
+Y &= R\hat X  = \begin{bmatrix}
+(x-\mu_1)cos\beta - (y-\mu_2)sin\beta\\
+(x-\mu_1)sin\beta + (y-\mu_2)cos\beta
+\end{bmatrix}
+\\
+S &= Y^T\Sigma^{-1}Y = \frac{\left[\cos (\beta ) \left(x-\mu _1\right)-\sin (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _1^2}+\\
+&\frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _2^2}
+\\
+
+G(X) &= \frac{a_i}{2\pi\sigma_1\sigma_2} e^{-\frac{1}{2}Y^T\Sigma^{-1}Y}\\
+
+\end{align}
+$$
+
+#### Gradient of gauss
+
+$$
+\begin{align}
+Y[1] &= (x-\mu_1)cos\beta - (y-\mu_2)sin\beta\\
+Y[2] &= (x-\mu_1)sin\beta + (y-\mu_2)cos\beta\\
+S[1] &= \frac{\left[\cos (\beta ) \left(x-\mu _1\right)-\sin (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _1^2}
+\\
+S[2] &= \frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _2^2}
+\\
+\frac{\partial G}{\partial a} &= \frac{G(X)}{a}
+\\
+
+\frac{\partial G}{\partial \mu_1} &= G(X)\left(\frac{Y[1]\cos (\beta ) }{\sigma_1^2}
++\frac{Y[2]\sin (\beta )}{\sigma_2^2} \right)\\
+
+\frac{\partial G}{\partial \mu_2} &= G(X)\left( \frac{Y[1]\sin (\beta )}{\sigma_1^2} 
++\frac{Y[2]\cos (\beta )}{\sigma_2^2} \right)\\
+
+\frac{\partial G}{\partial \sigma_1} &= 
+\frac{S[1]G(X)}{\sigma_1}
+-\frac{G(X)}{\sigma_1}
+\\
+
+\frac{\partial G}{\partial \sigma_2} &= 
+\frac{S[2]G(X)}{\sigma_2}
+-\frac{G(X)}{\sigma_2}
+\\
+
+\frac{\partial G}{\partial \beta} &= G(X)Y[1]Y[2]\left[ 
+\frac{ 1}{\sigma _1^2}-\frac{ 1}{\sigma _2^2}
+\right]
+\\
+
+\end{align}
+$$
+
+### Bortfeld function 
+
 Bortfeld function is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
 
 $$
@@ -179,7 +249,7 @@ $\mathfrak{D}(a,x)$, is a [parabolic cylinder function](https://mathworld.wolfra
 
 Parameters of a single bortfeld function is a 4-element 1d array, $[R_0,\sigma,\epsilon,\Phi_0]$,  n-bortfeld function is a $4n$ 1d array,$[R_1,\sigma_1,\epsilon_1,\Phi_1,R_2,\sigma_2,\epsilon_2,\Phi_2,\cdots,R_n,\sigma_n,\epsilon_n,\Phi_n]$.
 
-Gradients:
+#### Gradients:
 
 $$
 \begin{align}
