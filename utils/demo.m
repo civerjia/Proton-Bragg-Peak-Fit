@@ -1,5 +1,7 @@
-
-load('./src/zebra_idd.mat');
+addpath('../data/');
+addpath('..');
+%% fit and plot IBA Zebra data
+load('../data/zebra_idd.mat');
 f = figure;
 c = lines();
 for i = 1:10
@@ -16,9 +18,9 @@ ylabel('Dose(a.u.)')
 xlabel('Depth(cm)')
 grid on;
 grid minor;
-exportgraphics(f,'./images/Zebra_fit.png','Resolution',600)
-%%
-load('./src/head_idd.mat');
+exportgraphics(f,'../images/Zebra_fit.png','Resolution',600)
+%% fit and plot a few samples of head phantom data measured by MLSIC
+load('../data/head_idd.mat');
 idx = [214 454 1587 1724 4981];
 f = figure;
 c = lines();
@@ -36,9 +38,9 @@ ylabel('Dose(a.u.)')
 xlabel('Depth(cm)')
 grid on;
 grid minor;
-exportgraphics(f,'./images/IDD_fit.png','Resolution',600)
+exportgraphics(f,'../images/IDD_fit.png','Resolution',600)
 %% time benchmark 1 about 160s @i9-9900k
-load('./src/head_idd.mat');
+load('./data/head_idd.mat');
 num_bp = 2;
 tic;
 x_out = zeros(num_bp*4,size(z2d,1));
@@ -49,7 +51,7 @@ parfor i = 1:size(z2d,1)
 end
 toc;
 %% time benchmark 2 about 123.8s @i9-9900k
-load('./src/electron_idd.mat');
+load('../data/electron_idd.mat');
 num_bp = 2;
 tic;
 x_out = zeros(num_bp*4,size(z2d,1));
@@ -60,7 +62,7 @@ parfor i = 1:size(z2d,1)
 end
 toc;
 %% show results
-load('./src/electron_idd.mat');
+load('../data/electron_idd.mat');
 num_bp = 2;
 c = lines();
 for i = 1674%1:size(z2d,1)
@@ -70,7 +72,7 @@ for i = 1674%1:size(z2d,1)
     plot(z,idd_i,'Color',c(mod(i,256),:),'LineWidth',1);hold on
     plot(z,idd_o,'-.','Color',c(mod(i,256),:),'LineWidth',1)
 end
-%%
+%% convert results to image
 zrange = medfilt1(x_out(1,:),3)';
 [vo1] = protonspot2image(x_para,y_para,zrange);
 zrange = medfilt1(x_out(5,:),3)';
