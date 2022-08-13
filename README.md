@@ -137,6 +137,7 @@ Related function will be uploaded later.
 ### 2D Gaussian
 
 We model the covariance matrix of bivariate normal function by 3 parameters $\sigma_1, \sigma_2, \beta$. The $\sigma$ denotes the standard deviation, and $\beta$ denotes the rotation of the coordinate. For convience, let $X = [x,y]^T$ and $\hat X = X - [\mu_1,\mu_2]^T$
+
 $$
 \begin{align}
 \Sigma &= \begin{bmatrix}
@@ -159,9 +160,8 @@ Y &= R\hat X  = \begin{bmatrix}
 S &= Y^T\Sigma^{-1}Y = \frac{\left[\cos (\beta ) \left(x-\mu _1\right)-\sin (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _1^2}+\\
 &\frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\mu _2\right)\right]{}^2}{\sigma _2^2}
 \\
-
-G(X) &= \frac{a_i}{2\pi\sigma_1\sigma_2} e^{-\frac{1}{2}Y^T\Sigma^{-1}Y}\\
-
+G(X) &= \frac{a_i}{2\pi\sigma_1\sigma_2} e^{-\frac{1}{2}Y^T\Sigma^{-1}Y}
+\\
 \end{align}
 $$
 
@@ -177,28 +177,24 @@ S[2] &= \frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\m
 \\
 \frac{\partial G}{\partial a} &= \frac{G(X)}{a}
 \\
-
 \frac{\partial G}{\partial \mu_1} &= G(X)\left(\frac{Y[1]\cos (\beta ) }{\sigma_1^2}
-+\frac{Y[2]\sin (\beta )}{\sigma_2^2} \right)\\
-
++\frac{Y[2]\sin (\beta )}{\sigma_2^2} \right)
+\\
 \frac{\partial G}{\partial \mu_2} &= G(X)\left( \frac{Y[1]\sin (\beta )}{\sigma_1^2} 
-+\frac{Y[2]\cos (\beta )}{\sigma_2^2} \right)\\
-
++\frac{Y[2]\cos (\beta )}{\sigma_2^2} \right)
+\\
 \frac{\partial G}{\partial \sigma_1} &= 
 \frac{S[1]G(X)}{\sigma_1}
 -\frac{G(X)}{\sigma_1}
 \\
-
 \frac{\partial G}{\partial \sigma_2} &= 
 \frac{S[2]G(X)}{\sigma_2}
 -\frac{G(X)}{\sigma_2}
 \\
-
 \frac{\partial G}{\partial \beta} &= G(X)Y[1]Y[2]\left[ 
 \frac{ 1}{\sigma _1^2}-\frac{ 1}{\sigma _2^2}
 \right]
 \\
-
 \end{align}
 $$
 
