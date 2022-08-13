@@ -2,7 +2,7 @@ use_openmp = 1;
 use_avx = 1;
 is_avx512 = 0;
 output_filename = 'BortfeldFunction';
-src_path = './src/*.cpp';
+src_path = './bf_src/*.cpp';
 header_flag = ['-I','./includes/'];
 output_dir = '..';
 compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512);
@@ -10,7 +10,7 @@ compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,i
 function compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512)
 % output_filename : filename, (.mexw64) extension is not needed,
 % output_dir : '.' or '..'
-% src_path = './src/*.cpp';
+% src_path = './bf_src/*.cpp';
 % header_flag = ['-I','./includes/'];
 
 % use_openmp = 1;
