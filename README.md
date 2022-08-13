@@ -21,7 +21,7 @@
     - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this) **If you use this, change BortfeldFunction in bf_mex to BortfeldFunction_avx512f**
     - `BortfeldFunction.mexa64` Linux with avx2(supported by most of modern x86_64 CPU)
     - `BortfeldFunction.mexmaca64` for Apple Silicon Mac (do not Support AVX)
-    - `BortfeldFunction.mexmacai64` for Intel Mac
+    - `BortfeldFunction.mexmacai64` for Intel Mac (AVX not used) 
 - If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
 ## Compilation
 - Open the root folder run `cd('./src')` in matlab
@@ -61,9 +61,12 @@ bf_para = [15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4];
 % output size will be (n,m)
 output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
 ```
+- Other functions
+  - stored in `./utils/`
+  - If matlab crashed on Rosseta Matlab, run this function `ifMacCrashed()`
   
 ## 1D IDD data
-Details can be found in demo.m, column 1D array is prefered such as, zeros(n,1). Be caseful, run the demo section by section, some parts are time comsuming.
+Applications can be found in `./utils/demo.m` and data stored in `./data/`. Be careful, run the demo section by section, some parts are time comsuming.
 
 
 <div align="center">
