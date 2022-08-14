@@ -6,53 +6,37 @@
 
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-    double * z{}, * para{}, * idd_o{}, * grad_o{};
-    int size{ 4 }, idx{ 1 }, para_size{4};
-    z = mxGetPr(prhs[0]);
-    para = mxGetPr(prhs[1]);
+    float * Z{}, * para{};
+    int idx{ 1 };
+    Z = (float*)mxGetPr(prhs[0]);
+    para = (float*)mxGetPr(prhs[1]);
     idx = int(*mxGetPr(prhs[2]));
 
-    if (int(mxGetN(prhs[0])) <= int(mxGetM(prhs[0])))
-    {
-        size = int(mxGetM(prhs[0]));
-    }
-    else
-    {
-        size = int(mxGetN(prhs[0]));
-    }
-    if (int(mxGetN(prhs[1])) <= int(mxGetM(prhs[1])))
-    {
-        para_size = int(mxGetM(prhs[1]));
-    }
-    else
-    {
-        para_size = int(mxGetN(prhs[1]));
-    }
+    const mwSize *dim_Z = mxGetDimensions(prhs[0]);
+    const mwSize *dim_para = mxGetDimensions(prhs[1]);
+    int Nz = static_cast<int>(dim_Z[0]*dim_Z[1]);
+    int N_para = static_cast<int>(dim_para[0]*dim_para[1]);
 
-    int num_bps = para_size / 4; // number of bragg peaks
-    if (para_size % 4 == 0)
+    if (N_para % 4 == 0)
     {
-        // check size 
+        // check Nz 
         if (idx == 0)
         {
             // get dose
-            plhs[0] = mxCreateDoubleMatrix(size, 1, mxREAL);
-            idd_o = mxGetPr(plhs[0]);
-            BP::IDD_array_new(z, idd_o, para, size, para_size);
+            const mwSize size[2]{ dim_Z[0], dim_Z[1] };
+            plhs[0] = mxCreateNumericArray(2, size, mxSINGLE_CLASS, mxREAL);
+            float* idd_o_ptr;
+            idd_o_ptr = (float*)mxGetPr(plhs[0]);
+            BP::IDD_array_N(Z, idd_o_ptr, para, Nz, N_para);
         }
         else if(idx == 1)
         {
             // get Jacobian
-            plhs[0] = mxCreateDoubleMatrix(size, para_size, mxREAL);
-            grad_o = mxGetPr(plhs[0]);
-            BP::get_jacobian(z, grad_o, para, size, para_size);
-        }
-        else
-        {
-            // get mean gradient
-            plhs[0] = mxCreateDoubleMatrix(para_size, 1, mxREAL);
-            grad_o = mxGetPr(plhs[0]);
-            BP::get_mean_grad(z, grad_o, para, size, para_size);
+            const mwSize size[2]{ mwSize(Nz), mwSize(N_para) };
+            plhs[0] = mxCreateNumericArray(2, size, mxSINGLE_CLASS, mxREAL);
+            float * grad_o_ptr;
+            grad_o_ptr = (float*)mxGetPr(plhs[0]);
+            BP::get_jacobian(Z, grad_o_ptr, para, Nz, N_para);
         }
     }
 
