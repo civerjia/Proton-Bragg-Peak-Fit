@@ -1,16 +1,34 @@
 #pragma once
+#define _USE_MATH_DEFINES
+#include "parabolic_cylinder_function.h"
+#include <omp.h>
+#include <cmath>
+#include <vector>
 namespace BP
 {
-	double IDD(double depth, double R0, double sigma, double epsilon, double Phi);
-	double IDDV2(double depth, double R0, double sigma, double epsilon, double Phi, double a, double b, double c, double d);
-	double Bragg_hat(double z, double r, double s, double e, double p);
-	double Bragg(double z, double r, double s, double e, double p);
-	void IDD_array(double* depth, double* dose_o, int size, double R0, double sigma, double epsilon, double Phi);
-	void IDD_array_v2(double* depth, double* dose_o, int size, double R0, double sigma, double epsilon, double Phi, double a, double b, double c, double d);
-	void grad(double z, double* grad4_o, double r, double s, double e, double p);
-	void grad_array(double* z, double* grad_o, int size, double* para);
-	void fitBragg(double* z, double* dose, int size, double* para, double* lambda, int niter, double* idd_o, double* loss_o, double* para_o, double& Lmin);
-	void IDD_array_new(double* depth, double* dose_o, double* para_i, int size, int para_size);
-	void get_mean_grad(double* depth, double* grad_o, double* para_i, int size, int para_size);
-	void get_jacobian(double* depth, double* grad_o, double* para_i, int size, int para_size);
+	template <class T>
+	T IDD(T depth, T R0, T sigma, T epsilon, T Phi);
+	template <class T>
+	T IDDV2(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T d);
+	template <class T>
+	T Bragg_hat(T z, T r, T s, T e, T p);
+	template <class T>
+	T Bragg(T z, T r, T s, T e, T p);
+	template <class T>
+	void IDD_array(T* depth, T* dose_o, int size, T R0, T sigma, T epsilon, T Phi);
+	template <class T>
+	void IDD_array_v2(T* depth, T* dose_o, int size, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T d);
+	template <class T>
+	void grad(T z, T* grad4_o, T r, T s, T e, T p);
+	template <class T>
+	void grad_array(T* z, T* grad_o, int size, T* para);
+	template <class T>
+	void fitBragg(T* z, T* dose, int size, T* para, T* lambda, int niter, T* idd_o, T* loss_o, T* para_o, T& Lmin);
+	template <class T>
+	void IDD_array_N(T* depth, T* dose_o, T* para_i, int size, int para_size);
+	template <class T>
+	void get_mean_grad(T* depth, T* grad_o, T* para_i, int size, int para_size);
+	template <class T>
+	void get_jacobian(T* depth, T* grad_o, T* para_i, int size, int para_size);
 }
+
