@@ -1,11 +1,34 @@
 use_openmp = 1;
 use_avx = 1;
 is_avx512 = 0;
+output_dir = '.';
+
+%% compile BortfeldFunction
 output_filename = 'BortfeldFunction';
 src_path = './bf_src/*.cpp';
 header_flag = ['-I','./includes/'];
-output_dir = '..';
 compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512);
+%% compile Gauss2D
+if use_openmp
+    mexcuda COMPFLAGS="$COMPFLAGS -Xcompiler -openmp"...
+        LDOPTIMFLAGS="$LDOPTIMFLAGS -Xcompiler -fopenmp -O3 -lgomp"...
+        ./gauss_src/Gauss2D.cu ./gauss_src/gauss2d_gpu.cu ./gauss_src/gauss2d_cpu.cpp -I'./includes/';
+else
+    mexcuda -output 'Gauss2D' -outdir '.' ./gauss_src/Gauss2D.cu ...
+        ./gauss_src/gauss2d_gpu.cu ./gauss_src/gauss2d_cpu.cpp -I'./includes/';
+end
+%% compile ProtonDose3D
+if use_openmp
+    mexcuda -output 'ProtonDose3D' -outdir '.'...
+        COMPFLAGS="$COMPFLAGS -Xcompiler -openmp"...
+        LDOPTIMFLAGS="$LDOPTIMFLAGS -Xcompiler -fopenmp -O3 -lgomp"...
+        ./protonDose_src/ProtonDose3D.cpp ./gauss_src/gauss2d_gpu.cu ./gauss_src/gauss2d_cpu.cpp ...
+        ./bf_src/bp.cpp ./bf_src/parabolic_cylinder_function.cpp -I'./includes/';
+else
+    mexcuda -output 'ProtonDose3D' -outdir '.' ./protonDose_src/ProtonDose3D.cpp ...
+        ./gauss_src/gauss2d_gpu.cu ./gauss_src/gauss2d_cpu.cpp ...
+        ./bf_src/bp.cpp ./bf_src/parabolic_cylinder_function.cpp -I'./includes/';
+end
 %%
 function compile_mex(output_filename,output_dir,src_path,header_flag,use_openmp,use_avx,is_avx512)
 % output_filename : filename, (.mexw64) extension is not needed,
@@ -55,6 +78,7 @@ if use_openmp
             avx_flag = '';
         end
         mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,LinkerOptimizationFlags,avx_flag,header_flag,src_path);
+       
     elseif ispc
         % Code to run on Windows platform
         disp('Windows');
@@ -69,6 +93,7 @@ if use_openmp
             end
         end
         mex('-output',output_filename,'-outdir',output_dir,cpp_openmp_flag,src_path,header_flag);
+       
     end
 else
     % without any feature
