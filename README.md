@@ -63,7 +63,7 @@ output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
 ```
 - Test BortfeldFunction
 ```matlab
-z = single(linspace(0,19,Nz));
+z = single(linspace(0,19,64));
 bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
 idx = 0;
 idd_o = BortfeldFunction(z,bf_para,idx);
@@ -88,6 +88,7 @@ y = x;
 Nz = 64;
 gauss_para = repmat(single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]),1,Nz);
 N_gaussian = 2;
+isGPU = 1;
 
 z = single(linspace(0,19,Nz));
 bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
