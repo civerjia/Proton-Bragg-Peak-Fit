@@ -5,15 +5,12 @@ function output = bf_mex(depth,para,func_name)
     %         m = {1,2,3...}, m denotes the number of bragg peaks
     if strcmp(func_name,'idd')
         % return IDD
-        output = BortfeldFunction(depth,para,0);
+        output = double(BortfeldFunction(single(depth),single(para),0));
     elseif strcmp(func_name,'jacobian')
         % return mean gradient
-        output = BortfeldFunction(depth,para,1);
-    elseif strcmp(func_name,'grad')
-        % return mean gradient
-        output = BortfeldFunction(depth,para,2);
+        output = double(BortfeldFunction(single(depth),single(para),1));
     else
-        error('Undefined function name. Plz use idd, jacobian or grad');
+        error('Undefined function name. Plz use idd or jacobian');
     end
 end
 
