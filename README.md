@@ -61,10 +61,38 @@ bf_para = [15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4];
 % output size will be (n,m)
 output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
 ```
+- Test BortfeldFunction
+```matlab
+z = single(linspace(0,19,Nz));
+bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
+idx = 0;
+idd_o = BortfeldFunction(z,bf_para,idx);
+```
+- Test Gauss2D
+```matlab
+x = single(((1:128)-64.5)*0.2);
+y = x;
+gauss_para = single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]);
+Nz = 1;
+N_gaussian = 2;
+isGPU = 1;
+dose = Gauss2D(x,y,gauss_para,Nz,N_gaussian,isGPU);
+```
 - Other functions
   - stored in `./utils/`
   - If matlab crashed on Rosseta Matlab, run this function `ifMacCrashed()`
-  
+- Test ProtonDose3D
+```matlab
+x = single(((1:128)-64.5)*0.2);
+y = x;
+Nz = 64;
+gauss_para = repmat(single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]),1,Nz);
+N_gaussian = 2;
+
+z = single(linspace(0,19,Nz));
+bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
+dose3d = ProtonDose3D(x,y,z,gauss_para,bf_para,N_gaussian,isGPU);
+```
 ## 1D IDD data
 Applications can be found in `./utils/demo.m` and data stored in `./data/`. Be careful, run the demo section by section, some parts are time comsuming.
 
