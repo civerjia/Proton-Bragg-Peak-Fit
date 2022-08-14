@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <string>
 #include <fstream>      // std::ofstream
-#include <filesystem>
+// #include <filesystem> // C++17, save_dat function
 
 #include <omp.h>
 
@@ -41,23 +41,23 @@ namespace Gauss2d
         }
     }
     // save data to binary file
-    template <class T>
-    void save_dat(std::string filename, thrust::host_vector<T> vec)
-    {
-        std::ofstream outdata; // outdata is like cin
-        std::string fmt{ ".dat" };
-        outdata.open(filename + fmt, std::ofstream::binary | std::ofstream::out); // opens the file
-        outdata.write((char*)vec.data(), vec.size() * sizeof(T));
-        outdata.close();
-    }
-    template <class T>
-    void save_dat(std::string filename, std::vector<T> vec)
-    {
-        std::ofstream outdata; // outdata is like cin
-        std::string fmt{ ".dat" };
-        outdata.open(filename + fmt, std::ofstream::binary | std::ofstream::out); // opens the file
-        outdata.write((char*)vec.data(), vec.size() * sizeof(T));
-        outdata.close();
-    }
+    // template <class T>
+    // void save_dat(std::string filename, thrust::host_vector<T> vec)
+    // {
+    //     std::ofstream outdata; // outdata is like cin
+    //     std::string fmt{ ".dat" };
+    //     outdata.open(filename + fmt, std::ofstream::binary | std::ofstream::out); // opens the file
+    //     outdata.write((char*)vec.data(), vec.size() * sizeof(T));
+    //     outdata.close();
+    // }
+    // template <class T>
+    // void save_dat(std::string filename, std::vector<T> vec)
+    // {
+    //     std::ofstream outdata; // outdata is like cin
+    //     std::string fmt{ ".dat" };
+    //     outdata.open(filename + fmt, std::ofstream::binary | std::ofstream::out); // opens the file
+    //     outdata.write((char*)vec.data(), vec.size() * sizeof(T));
+    //     outdata.close();
+    // }
 }
 

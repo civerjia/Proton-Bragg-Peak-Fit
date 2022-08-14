@@ -106,32 +106,6 @@ void dose3d(std::vector<T> X, std::vector<T> Y, T* para, T* dose3d, int Nx, int 
 }
 
 template<class T>
-void dose3d_2(std::vector<T> X, std::vector<T> Y, T* para, T* dose3d, int Nx, int Ny, int Nz)
-{
-#pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz)
-    for (int nz = 0; nz < Nz; ++nz)
-    {
-        T A1 = para[nz * 8];
-        T mux1 = para[nz * 8 + 1];
-        T muy1 = para[nz * 8 + 2];
-        T sigma1 = para[nz * 8 + 3];
-        T A2 = para[nz * 8 + 4];
-        T mux2 = para[nz * 8 + 5];
-        T muy2 = para[nz * 8 + 6];
-        T sigma2 = para[nz * 8 + 7];
-        for (int ny = 0; ny < Ny; ++ny)
-        {
-            T y{ Y[ny] };
-            for (int nx = 0; nx < Nx; ++nx)
-            {
-                T x{ X[nx] };
-                int idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
-                dose3d[idx3d] = gauss2d_2(x, y, A1, mux1, muy1, sigma1, A2, mux2, muy2, sigma2);
-            }
-        }
-    }
-}
-template<class T>
 void dose3d_N_iso(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* dose3d, int Nx, int Ny, int Nz, int N_gaussian)
 {
 #pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz,para,N_gaussian)
