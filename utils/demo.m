@@ -25,15 +25,18 @@ idx = [214 454 1587 1724 4981];
 f = figure;
 c = lines();
 cnt = 1;
+tic;
 for i = idx
     idd_i = z2d(i,:)'; %214 454 1587 1724 4981
     num_bp = 3;
-    x = fast_fit(z',idd_i,num_bp);
+%     x = fast_fit(z',idd_i,num_bp);
+    x = fast_fit_v0(z',idd_i,num_bp);
     idd_o = bf_mex(z',x,'idd');
     plot(z,idd_i,'Color',c(cnt,:),'LineWidth',1);hold on
     plot(z,idd_o,'-.','Color',c(cnt,:),'LineWidth',1)
     cnt = cnt + 1;
 end
+toc;
 ylabel('Dose(a.u.)')
 xlabel('Depth(cm)')
 grid on;
