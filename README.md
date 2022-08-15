@@ -24,6 +24,9 @@
     - `BortfeldFunction.mexmacai64` for Intel Mac (AVX not used) 
 - If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
 ## Compilation
+- All precompiled mex function are set to **float**, it can **not be used for finite difference** optimization(double precision required). Use the gradient provided by mex function.
+- It's easy to set mex functions to use double, just replace float with double in `using mex_type = float;` and SINGLE with DOUBLE in `using mex_type_class = mxSINGLE_CLASS;` before `void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])` 
+    - But you cannot set GPU code to float
 - Open the root folder run `cd('./src')` in matlab
 - run `compile_PBPF` three compile flags are provided
     - use_openmp = 1; Use OpenMP
@@ -76,7 +79,8 @@ gauss_para = single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]);
 Nz = 1;
 N_gaussian = 2;
 isGPU = 1;
-dose = Gauss2D(x,y,gauss_para,Nz,N_gaussian,isGPU);
+isGrad = 0;
+dose = Gauss2D(x,y,gauss_para,Nz,N_gaussian,isGPU,isGrad);
 ```
 - Other functions
   - stored in `./utils/`
@@ -195,6 +199,7 @@ G(X) &= \frac{a_i}{2\pi\sigma_1\sigma_2} e^{-\frac{1}{2}Y^T\Sigma^{-1}Y}
 $$
 
 #### Gradient of gauss
+Formulas are double checked and compared with finite difference.
 
 $$
 \begin{align}
@@ -209,7 +214,7 @@ S[2] &= \frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\m
 \frac{\partial G}{\partial \mu_1} &= G(X)\left(\frac{Y[1]\cos (\beta ) }{\sigma_1^2}
 +\frac{Y[2]\sin (\beta )}{\sigma_2^2} \right)
 \\
-\frac{\partial G}{\partial \mu_2} &= G(X)\left( \frac{Y[1]\sin (\beta )}{\sigma_1^2} 
+\frac{\partial G}{\partial \mu_2} &= G(X)\left(- \frac{Y[1]\sin (\beta )}{\sigma_1^2} 
 +\frac{Y[2]\cos (\beta )}{\sigma_2^2} \right)
 \\
 \frac{\partial G}{\partial \sigma_1} &= 
