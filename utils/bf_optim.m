@@ -4,10 +4,10 @@ function [F,J] = bf_optim(para,depth)
     %         size must be (4*m,1) or (1,4*m)  [range, sigma, slope, Phi]
     %         m = {1,2,3...}, m denotes the number of bragg peaks
     
-    F = BortfeldFunction(depth,para,0);% objective function values at x
+    F = double(BortfeldFunction(single(depth),single(para),0));% objective function values at x
     if nargout > 1   % two output arguments
         % return gradient
-        J = BortfeldFunction(depth,para,1);
+        J = double(BortfeldFunction(single(depth),single(para),1));
     end
 end
 
