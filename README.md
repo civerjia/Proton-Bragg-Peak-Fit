@@ -15,18 +15,18 @@
 - Pre-compiled functions are provided.
     - `BortfeldFunction.mexw64` Windows with avx2(supported by most of modern x86_64 CPU).
 - If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
-
-## Linux and MacOS
+## MacOS
 - Pre-compiled functions are provided.
-    - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this) **If you use this, change BortfeldFunction in bf_mex to BortfeldFunction_avx512f**
-    - `BortfeldFunction.mexa64` Linux with avx2(supported by most of modern x86_64 CPU)
     - `BortfeldFunction.mexmaca64` for Apple Silicon Mac (do not Support AVX)
     - `BortfeldFunction.mexmacai64` for Intel Mac (AVX not used) 
 - If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
+## Linux 
+- Pre-compiled functions are **Not** provided.
+    - `BortfeldFunction_avx512f.mexa64` Linux with avx512f (Only some x86_64 CPU support this) **If you use this, change BortfeldFunction in bf_mex to BortfeldFunction_avx512f**
+    - `BortfeldFunction.mexa64` Linux with avx2(supported by most of modern x86_64 CPU)
+- If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
 ## Compilation
-- All precompiled mex function are set to **float**, it can **not be used for finite difference** optimization(double precision required). Use the gradient provided by mex function.
-- It's easy to set mex functions to use double, just replace float with double in `using mex_type = float;` and SINGLE with DOUBLE in `using mex_type_class = mxSINGLE_CLASS;` before `void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])` 
-    - But you cannot set GPU code to float
+- All precompiled mex function can work with both `single` and `double`, but `single` numbers can **not be used for finite difference** optimization(double precision required). Use the gradient provided by mex function.
 - Open the root folder run `cd('./src')` in matlab
 - run `compile_PBPF` three compile flags are provided
     - use_openmp = 1; Use OpenMP
@@ -64,40 +64,21 @@ bf_para = [15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4];
 % output size will be (n,m)
 output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
 ```
-- Test BortfeldFunction
-```matlab
-z = single(linspace(0,19,64));
-bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
-idx = 0;
-idd_o = BortfeldFunction(z,bf_para,idx);
-```
-- Test Gauss2D
-```matlab
-x = single(((1:128)-64.5)*0.2);
-y = x;
-gauss_para = single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]);
-Nz = 1;
-N_gaussian = 2;
-isGPU = 1;
-isGrad = 0;
-dose = Gauss2D(x,y,gauss_para,Nz,N_gaussian,isGPU,isGrad);
-```
 - Other functions
   - stored in `./utils/`
   - If matlab crashed on Rosseta Matlab, run this function `ifMacCrashed()`
-- Test ProtonDose3D
+- Benchmark of mex functions `./utils/test_mex_func.m`, further optimization required.
 ```matlab
-x = single(((1:128)-64.5)*0.2);
-y = x;
-Nz = 64;
-gauss_para = repmat(single([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]),1,Nz);
-N_gaussian = 2;
-isGPU = 1;
-
-z = single(linspace(0,19,Nz));
-bf_para = single([15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4]);
-dose3d = ProtonDose3D(x,y,z,gauss_para,bf_para,N_gaussian,isGPU);
+% BortfeldFunction time: single(0.249554s), double(0.248533s)
+% BortfeldFunction Grad time: single(2.758517s), double(2.772066s)
+% Gauss2D Grad GPU time: single(0.942952s), double(1.575574s)
+% Gauss2D Grad CPU time: single(0.131198s), double(0.201214s)
+% Gauss2D GPU time: single(0.196284s), double(0.450232s)
+% Gauss2D CPU time: single(0.842755s), double(0.665228s)
+% ProtonDose3D GPU time: single(0.493263s), double(0.537123s)
+% ProtonDose3D CPU time: single(0.751850s), double(0.496489s)
 ```
+
 ## 1D IDD data
 Applications can be found in `./utils/demo.m` and data stored in `./data/`. Be careful, run the demo section by section, some parts are time comsuming.
 
@@ -297,12 +278,6 @@ $$
 &+\frac{0.565 \Phi_0 e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{(0.012 R_0+1) \sigma^{0.435}}\\
 &+\frac{\Phi_0 (R_0-z)^2 e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{2 (0.012 R_0+1) \sigma^{2.435}}
 \\
-\end{align}
-$$
-
-
-$$
-\begin{align}
 \frac{\partial D}{\partial R_0} &=
 \frac{\Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(-\frac{11.26 f^{(1,0)}\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma^2}-\frac{\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f^{(1,0)}\left(\frac{z-R_0}{\sigma},-1.565\right)}{\sigma}-\frac{11.26 \epsilon  f\left(\frac{z-R_0}{\sigma},-1.565\right)}{R_0^2}\right)}{0.012 R_0+1}\\
 &+\frac{0.012 (-1) \Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{(0.012 R_0+1)^2}\\
@@ -316,6 +291,7 @@ f^{(1,0)}\left(x,a\right) &=
 \\
 \end{align}
 $$
+
 
 # Reference :
 - An analytical approximation of the Bragg curve for therapeutic proton beams
