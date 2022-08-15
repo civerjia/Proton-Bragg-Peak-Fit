@@ -17,36 +17,36 @@ t(4) = test_bf(N,isSingle,1);
 fprintf("BortfeldFunction Grad time: single(%fs), double(%fs)\n",t(3),t(4));
 disp("No significant difference, because they use the same PCF part(double), PCF cannot work with single.")
 %% speed test Gauss2D 
-% Gauss2D GPU time: single(0.942952s), double(1.575574s)
-% Gauss2D CPU time: single(0.131198s), double(0.201214s)
-% Gauss2D Grad GPU time: single(0.196284s), double(0.450232s)
-% Gauss2D Grad CPU time: single(0.842755s), double(0.665228s)
+% Gauss2D Grad GPU time: single(0.942952s), double(1.575574s)
+% Gauss2D Grad CPU time: single(0.131198s), double(0.201214s)
+% Gauss2D GPU time: single(0.196284s), double(0.450232s)
+% Gauss2D CPU time: single(0.842755s), double(0.665228s)
 N = 1;
 t = zeros(2,1);
 config = [1,1,1];% isSingle,isGPU,isGrad
 t(1) = test_gauss2d(N,config(1),config(2),config(3));
 config = [0,1,1];% isSingle,isGPU,isGrad
 t(2) = test_gauss2d(N,config(1),config(2),config(3));
-fprintf("Gauss2D GPU time: single(%fs), double(%fs)\n",t(1),t(2));
+fprintf("Gauss2D Grad GPU time: single(%fs), double(%fs)\n",t(1),t(2));
 
 config = [1,0,1];% isSingle,isGPU,isGrad
 t(1) = test_gauss2d(N,config(1),config(2),config(3));
 config = [0,0,1];% isSingle,isGPU,isGrad
 t(2) = test_gauss2d(N,config(1),config(2),config(3));
-fprintf("Gauss2D CPU time: single(%fs), double(%fs)\n",t(1),t(2));
+fprintf("Gauss2D Grad CPU time: single(%fs), double(%fs)\n",t(1),t(2));
 
 N = 1e2;
 config = [1,1,0];% isSingle,isGPU,isGrad
 t(1) = test_gauss2d(N,config(1),config(2),config(3));
 config = [0,1,0];% isSingle,isGPU,isGrad
 t(2) = test_gauss2d(N,config(1),config(2),config(3));
-fprintf("Gauss2D Grad GPU time: single(%fs), double(%fs)\n",t(1),t(2));
+fprintf("Gauss2D GPU time: single(%fs), double(%fs)\n",t(1),t(2));
 
 config = [1,0,0];% isSingle,isGPU,isGrad
 t(1) = test_gauss2d(N,config(1),config(2),config(3));
 config = [0,0,0];% isSingle,isGPU,isGrad
 t(2) = test_gauss2d(N,config(1),config(2),config(3));
-fprintf("Gauss2D Grad CPU time: single(%fs), double(%fs)\n",t(1),t(2));
+fprintf("Gauss2D CPU time: single(%fs), double(%fs)\n",t(1),t(2));
 %% speed test ProtonDose3D
 % ProtonDose3D GPU time: single(0.493263s), double(0.537123s)
 % ProtonDose3D CPU time: single(0.751850s), double(0.496489s)
