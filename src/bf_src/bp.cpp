@@ -106,11 +106,11 @@ void BP::grad(T z, T* grad4_o, T r, T s, T e, T p)
     T dD_1565 = static_cast<T>(PCF::call_dD(-r_z / s, -1.565));
 
     T B2_scale = ((T)0.157 + ((T)11.26 * e) / r);
-
-    dBhat_dr = (-(T)0.012 * p * ((T)17.93 / pow_r_z_0435 + ((T)0.444 + (T)86.1695 / r) * pow_r_z_0565)) / pow_1012r_2 +
-        (p * (-(T)7.79955 / pow(r_z, (T)1.435) + ((T)0.565 * ((T)0.444 + (T)86.1695 / r)) / pow_r_z_0435 - ((T)86.1695 * pow_r_z_0565) / (r_sqr))) / r_hat;
+    T Bhat2_scale = ((T)0.444 + (T)31.7*e / r);
+    dBhat_dr = (-(T)0.012 * p * ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565)) / pow_1012r_2 +
+        (p * (-(T)7.79955 / pow(r_z, (T)1.435) + ((T)0.565 * Bhat2_scale) / pow_r_z_0435 - ((T)31.7*e * pow_r_z_0565) / (r_sqr))) / r_hat;
     dBhat_de = ((T)31.7 * p * pow_r_z_0565) / (r + (T)0.012 * r_sqr);
-    dBhat_dp = ((T)17.93 / pow_r_z_0435 + ((T)0.444 + (T)86.1695 / r) * pow_r_z_0565) / r_hat;
+    dBhat_dp = ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565) / r_hat;
 
     dB_dr = (-(T)0.012 * p * pow_s_0565 * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * pow_1012r_2) -
         (p * r_z * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / ((T)2.0 * exp_val * r_hat * pow(s, (T)1.435)) +
