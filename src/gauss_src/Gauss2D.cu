@@ -1,4 +1,5 @@
 #include "gauss2d.h"
+#include "matrix.h"
 #include "mex.h"
 
 // disable matlab entry function
@@ -48,7 +49,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
             mex_type1* dose3d_ptr{};
             dose3d_ptr = (mex_type1*)mxGetPr(plhs[0]);
             //get 3D dose layer by layer
-            Gauss2d::interface( X_vec, Y_vec, para_vec, dose3d_ptr, Nx, Ny, Nz, N_para, N_gaussian);// cpu version
+            if(isGPU == 0)
+            {
+                Gauss2d::interface( X_vec, Y_vec, para_vec, dose3d_ptr, Nx, Ny, Nz, N_para, N_gaussian);// cpu version
+            }
+            else
+            {
+                Gauss2d::cuda_interface( X_vec, Y_vec, para_vec, dose3d_ptr, Nx, Ny, Nz, N_para, N_gaussian);// gpu version
+            }
         }
         else
         {
@@ -57,7 +65,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
             mex_type1* grad_ptr{};
             grad_ptr = (mex_type1*)mxGetPr(plhs[0]);
             //get gradient
-            Gauss2d::interface_gradient( X_vec, Y_vec, para_vec, grad_ptr, Nx, Ny, Nz, N_para, N_gaussian);// cpu version
+            if(isGPU == 0)
+            {
+                Gauss2d::interface_gradient( X_vec, Y_vec, para_vec, grad_ptr, Nx, Ny, Nz, N_para, N_gaussian);// cpu version
+            }
+            else
+            {
+                Gauss2d::cuda_interface_gradient( X_vec, Y_vec, para_vec, grad_ptr, Nx, Ny, Nz, N_para, N_gaussian);// gpu version
+            }
         }
     }
     else if(id0 + id1 + id2 == 3*mxSINGLE_CLASS)
