@@ -29,8 +29,13 @@ namespace Gauss2d
     using device_vec = thrust::device_vector<float>;
 
     void cuda_interface(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+    void cuda_interface_gradient(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+    
     template<class T>
     void interface(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+
+    template<class T>
+    void interface_gradient(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* grad_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
 
     template <class T>
     void linspace(T* L, T dmin, T dmax, int N)
