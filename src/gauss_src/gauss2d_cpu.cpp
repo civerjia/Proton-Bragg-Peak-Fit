@@ -9,11 +9,12 @@
 // // #include "mex.h"
 #include "gauss2d.h"
 
+
 template<class T>
 inline T gauss1d(T x, T A, T mu, T sigma)
 {
     T c{ M_SQRT1_2 * sqrt(M_1_PI) / sigma };
-    return A * c * exp(-0.5 * pow((x - mu) / sigma, 2.0));
+    return A * c * exp(-0.5 * pow((x - mu) / sigma, 2));
 }
 template<class T>
 void gauss1DGradient(std::vector<T> X, std::vector<T>  para, T* ouput, int Nx, int N_gaussian)
@@ -39,14 +40,15 @@ void gauss1DGradient(std::vector<T> X, std::vector<T>  para, T* ouput, int Nx, i
 template<class T>
 inline T gauss2d(T x, T y, T A, T mux, T muy, T sigma)
 {
-    if ((sigma < 1e-10))
+    if ((sigma < 1e-7) | (A < 1e-7))
     {
         return 0.0;
     }
     else
     {
-        T half_1_sigma2 = 0.5 * pow(1.0 / sigma, 2.0);
-        return A * M_1_PI * half_1_sigma2 * exp(-half_1_sigma2 * (pow((x - mux), 2.0) + pow((y - muy), 2.0)));
+        T one_sigma_sqr = T(1.0) / (sigma * sigma);
+        T half_1_sigma2 = T(0.5) * one_sigma_sqr;
+        return A * M_1_PI * half_1_sigma2 * exp(-half_1_sigma2 * (pow((x - mux), 2) + pow((y - muy), 2)));
     }
 }
 
@@ -109,32 +111,62 @@ template<class T>
 void dose3d_N_iso(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* dose3d, int Nx, int Ny, int Nz, int N_gaussian)
 {
 #pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz,para,N_gaussian)
-    for (int nz = 0; nz < Nz; ++nz)
+
+    for (int ny = 0; ny < Ny; ++ny)
     {
-        T A{};
-        for (int ng = 0; ng < N_gaussian; ++ng)
+        T y{Y[ny]};
+        for (int nx = 0; nx < Nx; ++nx)
         {
-            A += para[nz * N_gaussian * 4 + 4 * ng];
-        }
-        if (A > 1e-10)
-        {
-            for (int ny = 0; ny < Ny; ++ny)
+            T x{X[nx]};
+            for (int nz = 0; nz < Nz; ++nz)
             {
-                T y{ Y[ny] };
-                for (int nx = 0; nx < Nx; ++nx)
+                int idx3d{nx + ny * Nx + nz * (Nx * Ny)};
+                T temp{};
+                for (int ng = 0; ng < N_gaussian; ++ng)
                 {
-                    T x{ X[nx] };
-                    int idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
-                    T temp{};
-                    for (int ng = 0; ng < N_gaussian; ++ng)
-                    {
-                        T A1 = para[nz * N_gaussian * 4 + 4 * ng];
-                        T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
-                        T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
-                        T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
-                        temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
-                    }
-                    dose3d[idx3d] = temp;
+                    T A1 = para[nz * N_gaussian * 4 + 4 * ng];
+                    T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+                    T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+                    T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+                    temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
+                }
+                dose3d[idx3d] = temp;
+            }
+        }
+    }
+}
+template<class T>
+void dose3d_N_iso_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* output, int Nx, int Ny, int Nz, int N_gaussian)
+{
+    int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(4) ;
+    
+#pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz,para,N_gaussian,N_gauss_para)
+
+    for (int ny = 0; ny < Ny; ++ny)
+    {
+        T y{Y[ny]};
+        for (int nx = 0; nx < Nx; ++nx)
+        {
+            T x{X[nx]};
+            for (int nz = 0; nz < Nz; ++nz)
+            {
+                int64_t idx3d{nx + ny * Nx + nz * (Nx * Ny)};
+                for (int ng = 0; ng < N_gaussian; ++ng)
+                {
+                    T A1 = para[nz * N_gaussian * 4 + 4 * ng];
+                    T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+                    T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+                    T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+                    T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
+                    T sigma_sqr = sigma1 * sigma1;
+                    T One_sigma_sqr = 1.0 / (sigma_sqr);
+                    T x_mux = x - mux1;
+                    T y_muy = y - muy1;
+                    T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
                 }
             }
         }
@@ -145,34 +177,80 @@ template<class T>
 void dose3d_N(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* dose3d, int Nx, int Ny, int Nz, int N_gaussian)
 {
 #pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz,para,N_gaussian)
-    for (int nz = 0; nz < Nz; ++nz)
+
+    for (int ny = 0; ny < Ny; ++ny)
     {
-        T A{};
-        for (int ng = 0; ng < N_gaussian; ++ng)
+        T y{Y[ny]};
+        for (int nx = 0; nx < Nx; ++nx)
         {
-            A += para[nz * N_gaussian * 4 + 4 * ng];
-        }
-        if (A > 1e-10)
-        {
-            for (int ny = 0; ny < Ny; ++ny)
+            T x{X[nx]};
+            for (int nz = 0; nz < Nz; ++nz)
             {
-                T y{ Y[ny] };
-                for (int nx = 0; nx < Nx; ++nx)
+                int idx3d{nx + ny * Nx + nz * (Nx * Ny)};
+                T temp{};
+                for (int ng = 0; ng < N_gaussian; ++ng)
                 {
-                    T x{ X[nx] };
-                    int idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
-                    T temp{};
-                    for (int ng = 0; ng < N_gaussian; ++ng)
-                    {
-                        T A = para[nz * N_gaussian * 6 + 6 * ng];
-                        T mux = para[nz * N_gaussian * 6 + 6 * ng + 1];
-                        T muy = para[nz * N_gaussian * 6 + 6 * ng + 2];
-                        T sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
-                        T sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
-                        T beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
-                        temp += mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
-                    }
-                    dose3d[idx3d] = temp;
+                    T A = para[nz * N_gaussian * 6 + 6 * ng];
+                    T mux = para[nz * N_gaussian * 6 + 6 * ng + 1];
+                    T muy = para[nz * N_gaussian * 6 + 6 * ng + 2];
+                    T sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
+                    T sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
+                    T beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
+                    temp += mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+                }
+                dose3d[idx3d] = temp;
+            }
+        }
+    }
+}
+template<class T>
+void dose3d_N_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* output, int Nx, int Ny, int Nz, int N_gaussian)
+{
+    int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(6) ;
+#pragma omp parallel for firstprivate(X,Y,Nx,Ny,Nz,para,N_gaussian)
+    for (int ny = 0; ny < Ny; ++ny)
+    {
+        T y{Y[ny]};
+        for (int nx = 0; nx < Nx; ++nx)
+        {
+            T x{X[nx]};
+            for (int nz = 0; nz < Nz; ++nz)
+            {
+                int idx3d{nx + ny * Nx + nz * (Nx * Ny)};
+                for (int ng = 0; ng < N_gaussian; ++ng)
+                {
+                    T A = para[nz * N_gaussian * 6 + 6 * ng];
+                    T mux = para[nz * N_gaussian * 6 + 6 * ng + 1];
+                    T muy = para[nz * N_gaussian * 6 + 6 * ng + 2];
+                    T sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
+                    T sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
+                    T beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
+                    T G = mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+                    T sigma1_sqr = sigma1 * sigma1;
+                    T sigma2_sqr = sigma2 * sigma2;
+                    T One_sigma1_sqr = 1.0 / (sigma1_sqr);
+                    T One_sigma2_sqr = 1.0 / (sigma2_sqr);
+                    T x_mux = x - mux;
+                    T y_muy = y - muy;
+                    T cosb = cos(beta);
+                    T sinb = sin(beta);
+                    T Y1 = x_mux * cosb - y_muy * sinb;
+                    T Y2 = x_mux * sinb + y_muy * cosb;
+                    T S1 = (Y1 * Y1) / (sigma1_sqr);
+                    T S2 = (Y2 * Y2) / (sigma2_sqr);
+                    T Y1_sigma1_sqr = Y1 * One_sigma1_sqr;
+                    T Y2_sigma2_sqr = Y2 * One_sigma2_sqr;
+                    T w1 = (Y1_sigma1_sqr * cosb + Y2_sigma2_sqr * sinb);
+                    T w2 = (-Y1_sigma1_sqr * sinb + Y2_sigma2_sqr * cosb);
+                    T w3 = (S1 - 1.0) / (sigma1);
+                    T w4 = (S2 - 1.0) / (sigma2);
+                    T w5 = Y1 * Y2 * (One_sigma1_sqr - One_sigma2_sqr);
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = G / (A);    // dG/dA
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 1] = w1 * G; // dG/dmux
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 2] = w2 * G; // dG/dmuy
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 3] = w3 * G; // dG/ds1
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 4] = w4 * G; // dG/ds2
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 5] = w5 * G; // dG/db
                 }
             }
         }
@@ -191,8 +269,22 @@ void Gauss2d::interface(std::vector<T> X, std::vector<T> Y, std::vector<T> para,
     }
 }
 
+template<class T>
+void Gauss2d::interface_gradient(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* grad_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian)
+{
+    if (N_para == Nz * N_gaussian * 6)
+    {
+        dose3d_N_Gradient(X, Y, para, grad_ptr, Nx, Ny, Nz, N_gaussian);
+    }
+    else if (N_para == Nz * N_gaussian * 4)
+    {
+        dose3d_N_iso_Gradient(X, Y, para, grad_ptr, Nx, Ny, Nz, N_gaussian);
+    }
+}
+
 template void Gauss2d::interface(std::vector<double> X, std::vector<double> Y, std::vector<double> para, double* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
 template void Gauss2d::interface(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
 
-
+template void Gauss2d::interface_gradient(std::vector<double> X, std::vector<double> Y, std::vector<double> para, double* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+template void Gauss2d::interface_gradient(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
 

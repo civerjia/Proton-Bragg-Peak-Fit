@@ -113,6 +113,40 @@ __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
         dose3d[idx3d] = temp;
     }
 }
+__global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
+{// isotropic 2d gaussian function
+    int nx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ny = blockIdx.y * blockDim.y + threadIdx.y;
+    int nz = blockIdx.z * blockDim.z + threadIdx.z;
+    int Nx = constmem_Nsize[0];
+    int Ny = constmem_Nsize[1];
+    int Nz = constmem_Nsize[2];
+    int N_gaussian = constmem_Nsize[3];
+    if (nz < Nz & ny < Ny & nx < Nx)
+    {
+        int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(4) ;
+        int idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
+        T x{ X[nx] };
+        T y{ Y[ny] };
+        for (int ng = 0; ng < N_gaussian; ++ng)
+        {
+            T A1 = para[nz * N_gaussian * 4 + 4 * ng];
+            T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+            T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+            T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+            T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
+            T sigma_sqr = sigma1 * sigma1;
+            T One_sigma_sqr = 1.0 / (sigma_sqr);
+            T x_mux = x - mux1;
+            T y_muy = y - muy1;
+            T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
+        }
+    }
+}
 
 
 __global__ void dose3d_N(T* X, T* Y, T* para, T* dose3d)
@@ -149,6 +183,64 @@ __global__ void dose3d_N(T* X, T* Y, T* para, T* dose3d)
     dose3d[idx3d] = temp;
 
 }
+__global__ void dose3d_N_Gradient(T* X, T* Y, T* para, T* output)
+{// general 2d gaussian function
+    int nx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ny = blockIdx.y * blockDim.y + threadIdx.y;
+    int nz = blockIdx.z * blockDim.z + threadIdx.z;
+    int Nx = constmem_Nsize[0];
+    int Ny = constmem_Nsize[1];
+    int Nz = constmem_Nsize[2];
+    int N_gaussian = constmem_Nsize[3];
+    // __shared__ X_shared[512];
+    // __shared__ Y_shared[512];
+    if (nx >= Nx || ny >= Ny || nz >= Nz) return;
+
+    // X_shared[nx] = X[nx];
+    // Y_shared[ny] = Y[ny];
+    // __syncthreads();
+    // 
+    int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(6) ;
+    int idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
+    T x{ X[nx] };
+    T y{ Y[ny] };
+    for (int ng = 0; ng < N_gaussian; ++ng)
+    {
+        T A = para[nz * N_gaussian * 6 + 6 * ng];
+        T mux = para[nz * N_gaussian * 6 + 6 * ng + 1];
+        T muy = para[nz * N_gaussian * 6 + 6 * ng + 2];
+        T sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
+        T sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
+        T beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
+        T G = mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+        T sigma1_sqr = sigma1 * sigma1;
+        T sigma2_sqr = sigma2 * sigma2;
+        T One_sigma1_sqr = 1.0f / (sigma1_sqr);
+        T One_sigma2_sqr = 1.0f / (sigma2_sqr);
+        T x_mux = x - mux;
+        T y_muy = y - muy;
+        T cosb = cosf(beta);
+        T sinb = sinf(beta);
+        T Y1 = x_mux * cosb - y_muy * sinb;
+        T Y2 = x_mux * sinb + y_muy * cosb;
+        T S1 = (Y1 * Y1) / (sigma1_sqr);
+        T S2 = (Y2 * Y2) / (sigma2_sqr);
+        T Y1_sigma1_sqr = Y1 * One_sigma1_sqr;
+        T Y2_sigma2_sqr = Y2 * One_sigma2_sqr;
+        T w1 = (Y1_sigma1_sqr * cosb + Y2_sigma2_sqr * sinb);
+        T w2 = (-Y1_sigma1_sqr * sinb + Y2_sigma2_sqr * cosb);
+        T w3 = (S1 - 1.0f) / (sigma1);
+        T w4 = (S2 - 1.0f) / (sigma2);
+        T w5 = Y1 * Y2 * (One_sigma1_sqr - One_sigma2_sqr);
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = G / (A);    // dG/dA
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 1] = w1 * G; // dG/dmux
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 2] = w2 * G; // dG/dmuy
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 3] = w3 * G; // dG/ds1
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 4] = w4 * G; // dG/ds2
+        output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 5] = w5 * G; // dG/db
+    }
+
+}
 
 void Gauss2d::cuda_interface(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* dose3D, int Nx, int Ny, int Nz, int N_para, int N_gaussian)
 {
@@ -181,7 +273,35 @@ void Gauss2d::cuda_interface(std::vector<float> X, std::vector<float> Y, std::ve
     // direct copy data to host pointer
     cudaMemcpy(dose3D, dose3D_dev_ptr, sizeof(float)* dose_size, cudaMemcpyDeviceToHost);
 }
+void Gauss2d::cuda_interface_gradient(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian)
+{
+    int64_t grad_size = int64_t(N_para) * int64_t(Nx) * int64_t(Ny) * int64_t(Nz);
+    set_constant_mem(Nx, Ny, Nz, N_gaussian, N_para);
+    // copy data to device
+    device_vec X_dev = X;
+    device_vec Y_dev = Y;
+    device_vec para_dev = para;
+	device_vec grad_dev(grad_size);
+    // cast to raw pointer
+    T* X_dev_ptr = thrust::raw_pointer_cast(X_dev.data());
+    T* Y_dev_ptr = thrust::raw_pointer_cast(Y_dev.data());
+    T* para_dev_ptr = thrust::raw_pointer_cast(para_dev.data());
+    T* grad_dev_ptr = thrust::raw_pointer_cast(grad_dev.data());
 
+    dim3 threadsPerBlock(8, 8, 8);
+    dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+        (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
+    if (Nz * N_gaussian * 6 == N_para)
+    {
+        dose3d_N << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+    }
+    else if (Nz * N_gaussian * 4 == N_para)
+    {
+        dose3d_N_iso << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+    }
+    // copy data back to host
+    cudaMemcpy(grad, grad_dev_ptr, sizeof(float)* grad_size, cudaMemcpyDeviceToHost);
+}
 // disable matlab entry function
 // void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 //     T *X;
