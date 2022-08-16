@@ -80,13 +80,14 @@ function [t,idd_o] = test_bf(N,isSingle,isGrad)
     t = toc;
 end
 function [t,dose] = test_gauss2d(N,isSingle,isGPU,isGrad)
+    Nx = 128;
     Nz = 64;
     if isSingle
-        x = single(((1:128)-64.5)*0.2);
+        x = single(((1:Nx)-(Nx+1)/2)*0.2);
         y = x;
         gauss_para = single(repmat([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280],1,Nz));
     else
-        x = ((1:128)-64.5)*0.2;
+        x = ((1:Nx)-(Nx+1)/2)*0.2;
         y = x;
         gauss_para = repmat([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280],1,Nz);
     end
