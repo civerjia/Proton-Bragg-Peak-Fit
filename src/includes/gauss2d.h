@@ -27,8 +27,10 @@ namespace Gauss2d
     
     template<class T>
     void cuda_interface(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
-    template<class T>
-    void cuda_interface_gradient(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+    // template<class T>
+    // void cuda_interface_gradient(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+    void cuda_interface_gradient(std::vector<double> X, std::vector<double> Y, std::vector<double> para, double* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
+    void cuda_interface_gradient(std::vector<float> X, std::vector<float> Y, std::vector<float> para, float* grad, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
     
     template<class T>
     void interface(std::vector<T> X, std::vector<T> Y, std::vector<T> para, T* dose3d_ptr, int Nx, int Ny, int Nz, int N_para, int N_gaussian);
