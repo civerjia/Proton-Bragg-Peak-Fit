@@ -34,7 +34,7 @@ __constant__ const double const_1_2PI = 0.159154943091895;
 __constant__ int constmem_Nsize[5];
 // declare constant memory, Nx,Ny,Nz,N_gaussian,N_para
 // max 16384 float numbers
-__constant__ float constmem_para_f[6*2*1024];// N_para = 6*N_gaussian*Nz < 6*2*512, N_gaussian = 2, Nz <=512
+// __constant__ float constmem_para_f[6*2*1024];// N_para = 6*N_gaussian*Nz < 6*2*512, N_gaussian = 2, Nz <=512
 
 
 static void HandleError(cudaError_t err, const char *file, int line)
@@ -55,10 +55,10 @@ void set_constant_mem_Nsize(int Nx, int Ny, int Nz, int N_gaussian, int N_para)
     //mem_err = cudaMemcpyToSymbol(constmem_Nsize, &cNsize, sizeof(int) * 5);
     HANDLE_ERROR(cudaMemcpyToSymbol(constmem_Nsize, &cNsize, sizeof(int) * 5));
 }
-void set_constant_mem_para(float * para, int N_para)
-{
-    HANDLE_ERROR(cudaMemcpyToSymbol(constmem_para_f, &para, sizeof(float) * N_para));
-}
+// void set_constant_mem_para(float * para, int N_para)
+// {
+//     HANDLE_ERROR(cudaMemcpyToSymbol(constmem_para_f, &para, sizeof(float) * N_para));
+// }
 
 
 __inline__ __device__ float gauss2d(float x, float y, float A, float mux, float muy, float sigma)
@@ -387,7 +387,6 @@ void Gauss2d::cuda_interface_gradient(std::vector<float> X, std::vector<float> Y
 {
     int64_t grad_size = int64_t(N_para) * int64_t(Nx) * int64_t(Ny) * int64_t(Nz);
     set_constant_mem_Nsize(Nx, Ny, Nz, N_gaussian, N_para);
-    set_constant_mem_para(para.data(), N_para);
     // copy data to device
     thrust::device_vector<float> X_dev = X;
     thrust::device_vector<float> Y_dev = Y;
