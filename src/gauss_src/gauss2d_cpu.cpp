@@ -128,7 +128,11 @@ void dose3d_N_iso(std::vector<T> X, std::vector<T> Y, std::vector<T>  para, T* d
                     T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
                     T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
                     T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
-                    temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
+                    T dist2d = (x-mux1)*(x-mux1) + (y-muy1)*(y-muy1);
+                    if (dist2d < 16*sigma1*sigma1)
+                    {
+                        temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
+                    }
                 }
                 dose3d[idx3d] = temp;
             }
@@ -157,16 +161,21 @@ void dose3d_N_iso_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  p
                     T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
                     T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
                     T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
-                    T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
                     T sigma_sqr = sigma1 * sigma1;
-                    T One_sigma_sqr = 1.0 / (sigma_sqr);
                     T x_mux = x - mux1;
                     T y_muy = y - muy1;
-                    T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
-                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
-                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
-                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
-                    output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
+                    T dist2d = x_mux*x_mux + y_muy*y_muy;
+                    if (dist2d < 16*sigma_sqr)
+                    {
+                        T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
+                        
+                        T One_sigma_sqr = 1.0 / (sigma_sqr);
+                        T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
+                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
+                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
+                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
+                    }
                 }
             }
         }
