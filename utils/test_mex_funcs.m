@@ -47,6 +47,26 @@ t(1) = test_gauss2d(N,config(1),config(2),config(3));
 config = [0,0,0];% isSingle,isGPU,isGrad
 t(2) = test_gauss2d(N,config(1),config(2),config(3));
 fprintf("Gauss2D CPU time: single(%fs), double(%fs)\n",t(1),t(2));
+%% speed test Gauss2D iso
+% Gauss2D_ISO GPU time: single(1.412530s), double(11.653478s)
+% Gauss2D_ISO CPU time: single(unknown), double(unknown) very long time
+N = 1e2;
+config = [1,1,0];% isSingle,isGPU,isGrad
+t(1) = test_gauss2d_iso(N,config(1),config(2),config(3));
+config = [0,1,0];% isSingle,isGPU,isGrad
+t(2) = test_gauss2d_iso(N,config(1),config(2),config(3));
+fprintf("Gauss2D_ISO GPU time: single(%fs), double(%fs)\n",t(1),t(2));
+
+config = [1,0,0];% isSingle,isGPU,isGrad
+t(1) = test_gauss2d_iso(N,config(1),config(2),config(3));
+config = [0,0,0];% isSingle,isGPU,isGrad
+t(2) = test_gauss2d_iso(N,config(1),config(2),config(3));
+fprintf("Gauss2D_ISO CPU time: single(%fs), double(%fs)\n",t(1),t(2));
+%%
+config = [1,1,0];
+tic;
+[t,d] = test_gauss2d_iso(N,config(1),config(2),config(3));
+toc;
 %% speed test ProtonDose3D
 % ProtonDose3D GPU time: single(0.493263s), double(0.537123s)
 % ProtonDose3D CPU time: single(0.751850s), double(0.496489s)
@@ -95,6 +115,26 @@ function [t,dose] = test_gauss2d(N,isSingle,isGPU,isGrad)
     tic;
     for i = 1:N
         dose = Gauss2D(x,y,gauss_para,Nz,N_gaussian,isGPU,isGrad);
+    end
+    t =  toc;
+end
+function [t,dose] = test_gauss2d_iso(N,isSingle,isGPU,isGrad)
+    Nx = 128;
+    Nz = 64;
+    N_gaussian = 1024;
+    if isSingle
+        x = single(((1:Nx)-(Nx+1)/2)*0.2);
+        y = x;
+        gauss_para = single(repmat([0.5,-2,-3,1, 0.5,2,3,3],1,Nz*N_gaussian));
+    else
+        x = ((1:Nx)-(Nx+1)/2)*0.2;
+        y = x;
+        gauss_para = repmat([0.5,-2,-3,1, 0.5,2,3,3],1,Nz*N_gaussian);
+    end
+    
+    tic;
+    for i = 1:N
+        dose = Gauss2D(x,y,gauss_para,Nz,2*N_gaussian,isGPU,isGrad);
     end
     t =  toc;
 end
