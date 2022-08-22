@@ -514,15 +514,18 @@ void Gauss2d::cuda_interface_gradient(std::vector<double> X, std::vector<double>
     double* para_dev_ptr = thrust::raw_pointer_cast(para_dev.data());
     double* grad_dev_ptr = thrust::raw_pointer_cast(grad_dev.data());
 
-    dim3 threadsPerBlock(8, 8, 8);
-    dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
-        (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
     if (Nz * N_gaussian * 6 == N_para)
     {
+        dim3 threadsPerBlock(8, 8, 8);
+        dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
+        dim3 threadsPerBlock(8, 32, 2);
+        dim3 numBlocks((Nx*Ny - 1 + threadsPerBlock.x) / threadsPerBlock.x, (N_gaussian - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_iso_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     // copy data back to host
