@@ -135,8 +135,8 @@ function [t,dose] = test_gauss2d_iso(N,isSingle,isGPU,isGrad)
     end
     
     tic;
-    %for i = 1:N
-        dose = gauss2d_test(x,y,gauss_para,Nz,2*N_gaussian,isGPU,isGrad);
+    %for i = 1:N Gauss2D gauss2d_test
+        dose = Gauss2D(x,y,gauss_para,Nz,2*N_gaussian,isGPU,isGrad);
     %end
     t =  toc;
 end
