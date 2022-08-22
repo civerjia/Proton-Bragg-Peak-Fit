@@ -22,7 +22,11 @@
 // #include <filesystem>
 #include "gauss2d.h"
 
-
+//https://stackoverflow.com/questions/37566987/cuda-atomicadd-for-doubles-definition-error
+#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
+#else
+__device__ double atomicAdd(double* a, double b) { return b; }
+#endif
 
 __constant__ const float const_1_PI_f = 0.318309886183791;
 __constant__ const float const_1_2PI_f = 0.159154943091895;
@@ -140,34 +144,67 @@ __inline__ __device__ double mvn2d(double x, double y, double A, double mux, dou
 template<class T>
 __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
 {// isotropic 2d gaussian function
-    int nx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ny = blockIdx.y * blockDim.y + threadIdx.y;
+    int nxy = blockIdx.x * blockDim.x + threadIdx.x;
+    int ng = blockIdx.y * blockDim.y + threadIdx.y;
     int nz = blockIdx.z * blockDim.z + threadIdx.z;
     int Nx = constmem_Nsize[0];
     int Ny = constmem_Nsize[1];
     int Nz = constmem_Nsize[2];
     int N_gaussian = constmem_Nsize[3];
-    if (nz < Nz & ny < Ny & nx < Nx)
+    int nx = nxy / Ny;
+    int ny = nxy % Ny;
+
+    T x, y, A1, mux1, muy1, sigma1;
+    int64_t idx3d;
+    if (nxy < Nx * Ny & ng < N_gaussian & nz < Nz)
     {
-        int64_t idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
-        T x{ X[nx] };
-        T y{ Y[ny] };
-        T temp{};
-        for (int ng = 0; ng < N_gaussian; ++ng)
+        idx3d = nxy + nz * (Nx * Ny);
+        x = X[nx];
+        y = Y[ny];
+        A1 = para[nz * N_gaussian * 4 + 4 * ng];
+        mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+        muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+        sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+
+        T dist2d = (x - mux1) * (x - mux1) + (y - muy1) * (y - muy1);
+        if (dist2d < 16 * sigma1 * sigma1)
         {
-            T A1 = para[nz * N_gaussian * 4 + 4 * ng];
-            T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
-            T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
-            T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
-            T dist2d = (x-mux1)*(x-mux1) + (y-muy1)*(y-muy1);
-            if (dist2d < 16*sigma1*sigma1)
-            {
-                temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
-            }
+            atomicAdd(dose3d + idx3d, gauss2d(x, y, A1, mux1, muy1, sigma1));
         }
-        dose3d[idx3d] = temp;
     }
+
 }
+// template<class T>
+// __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
+// {// isotropic 2d gaussian function
+//     int nx = blockIdx.x * blockDim.x + threadIdx.x;
+//     int ny = blockIdx.y * blockDim.y + threadIdx.y;
+//     int nz = blockIdx.z * blockDim.z + threadIdx.z;
+//     int Nx = constmem_Nsize[0];
+//     int Ny = constmem_Nsize[1];
+//     int Nz = constmem_Nsize[2];
+//     int N_gaussian = constmem_Nsize[3];
+//     if (nz < Nz & ny < Ny & nx < Nx)
+//     {
+//         int64_t idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
+//         T x{ X[nx] };
+//         T y{ Y[ny] };
+//         T temp{};
+//         for (int ng = 0; ng < N_gaussian; ++ng)
+//         {
+//             T A1 = para[nz * N_gaussian * 4 + 4 * ng];
+//             T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+//             T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+//             T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+//             T dist2d = (x-mux1)*(x-mux1) + (y-muy1)*(y-muy1);
+//             if (dist2d < 16*sigma1*sigma1)
+//             {
+//                 temp += gauss2d(x, y, A1, mux1, muy1, sigma1);
+//             }
+//         }
+//         dose3d[idx3d] = temp;
+//     }
+// }
 template<class T>
 __global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
 {// isotropic 2d gaussian function
@@ -366,15 +403,19 @@ void Gauss2d::cuda_interface(std::vector<T> X, std::vector<T> Y, std::vector<T> 
     T* para_dev_ptr = thrust::raw_pointer_cast(para_dev.data());
     T* dose3D_dev_ptr = thrust::raw_pointer_cast(dose3D_dev.data());
 
-    dim3 threadsPerBlock(8, 8, 8);
-    dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
-        (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
+    
     if (Nz * N_gaussian * 6 == N_para)
     {
+        dim3 threadsPerBlock(8, 8, 8);
+        dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, dose3D_dev_ptr);
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
+        dim3 threadsPerBlock(4, 64, 2);
+        dim3 numBlocks((Nx*Ny - 1 + threadsPerBlock.x) / threadsPerBlock.x, (N_gaussian - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_iso << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, dose3D_dev_ptr);
     }
     // copy data back to host
@@ -403,11 +444,11 @@ void Gauss2d::cuda_interface_gradient(std::vector<float> X, std::vector<float> Y
         (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
     if (Nz * N_gaussian * 6 == N_para)
     {
-        dose3d_N << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+        dose3d_N_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
-        dose3d_N_iso << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+        dose3d_N_iso_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     // copy data back to host
     HANDLE_ERROR(cudaMemcpy(grad, grad_dev_ptr, sizeof(float)* grad_size, cudaMemcpyDeviceToHost));
@@ -432,11 +473,11 @@ void Gauss2d::cuda_interface_gradient(std::vector<double> X, std::vector<double>
         (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
     if (Nz * N_gaussian * 6 == N_para)
     {
-        dose3d_N << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+        dose3d_N_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
-        dose3d_N_iso << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
+        dose3d_N_iso_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     // copy data back to host
     HANDLE_ERROR(cudaMemcpy(grad, grad_dev_ptr, sizeof(double)* grad_size, cudaMemcpyDeviceToHost));
