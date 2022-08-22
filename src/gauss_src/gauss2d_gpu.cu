@@ -174,6 +174,48 @@ __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
     }
 
 }
+template<class T>
+__global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
+{// isotropic 2d gaussian function
+    int nxy = blockIdx.x * blockDim.x + threadIdx.x;
+    int ng = blockIdx.y * blockDim.y + threadIdx.y;
+    int nz = blockIdx.z * blockDim.z + threadIdx.z;
+    int Nx = constmem_Nsize[0];
+    int Ny = constmem_Nsize[1];
+    int Nz = constmem_Nsize[2];
+    int N_gaussian = constmem_Nsize[3];
+    int nx = nxy / Ny;
+    int ny = nxy % Ny;
+
+    T x, y, A1, mux1, muy1, sigma1;
+    int64_t idx3d;
+    int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(4);
+    if (nxy < Nx * Ny & ng < N_gaussian & nz < Nz)
+    {
+        idx3d = nxy + nz * (Nx * Ny);
+        x = X[nx];
+        y = Y[ny];
+        A1 = para[nz * N_gaussian * 4 + 4 * ng];
+        mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+        muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+        sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+        T sigma_sqr = sigma1 * sigma1;
+        T x_mux = x - mux1;
+        T y_muy = y - muy1;
+        T dist2d = x_mux * x_mux + y_muy * y_muy;
+        if (dist2d < 16 * sigma_sqr)
+        {
+            T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
+
+            T One_sigma_sqr = 1.0 / (sigma_sqr);
+            T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
+        }
+    }
+}
 // template<class T>
 // __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
 // {// isotropic 2d gaussian function
@@ -205,46 +247,46 @@ __global__ void dose3d_N_iso(T* X, T* Y, T* para, T* dose3d)
 //         dose3d[idx3d] = temp;
 //     }
 // }
-template<class T>
-__global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
-{// isotropic 2d gaussian function
-    int nx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ny = blockIdx.y * blockDim.y + threadIdx.y;
-    int nz = blockIdx.z * blockDim.z + threadIdx.z;
-    int Nx = constmem_Nsize[0];
-    int Ny = constmem_Nsize[1];
-    int Nz = constmem_Nsize[2];
-    int N_gaussian = constmem_Nsize[3];
-    if (nz < Nz & ny < Ny & nx < Nx)
-    {
-        int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(4) ;
-        int64_t idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
-        T x{ X[nx] };
-        T y{ Y[ny] };
-        for (int ng = 0; ng < N_gaussian; ++ng)
-        {
-            T A1 = para[nz * N_gaussian * 4 + 4 * ng];
-            T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
-            T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
-            T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
-            T sigma_sqr = sigma1 * sigma1;
-            T x_mux = x - mux1;
-            T y_muy = y - muy1;
-            T dist2d = x_mux*x_mux + y_muy*y_muy;
-            if (dist2d < 16*sigma_sqr)
-            {
-                T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
+// template<class T>
+// __global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
+// {// isotropic 2d gaussian function
+//     int nx = blockIdx.x * blockDim.x + threadIdx.x;
+//     int ny = blockIdx.y * blockDim.y + threadIdx.y;
+//     int nz = blockIdx.z * blockDim.z + threadIdx.z;
+//     int Nx = constmem_Nsize[0];
+//     int Ny = constmem_Nsize[1];
+//     int Nz = constmem_Nsize[2];
+//     int N_gaussian = constmem_Nsize[3];
+//     if (nz < Nz & ny < Ny & nx < Nx)
+//     {
+//         int64_t N_gauss_para = int64_t(Nz) * int64_t(N_gaussian) * int64_t(4) ;
+//         int64_t idx3d{ nx + ny * Nx + nz * (Nx * Ny) };
+//         T x{ X[nx] };
+//         T y{ Y[ny] };
+//         for (int ng = 0; ng < N_gaussian; ++ng)
+//         {
+//             T A1 = para[nz * N_gaussian * 4 + 4 * ng];
+//             T mux1 = para[nz * N_gaussian * 4 + 4 * ng + 1];
+//             T muy1 = para[nz * N_gaussian * 4 + 4 * ng + 2];
+//             T sigma1 = para[nz * N_gaussian * 4 + 4 * ng + 3];
+//             T sigma_sqr = sigma1 * sigma1;
+//             T x_mux = x - mux1;
+//             T y_muy = y - muy1;
+//             T dist2d = x_mux*x_mux + y_muy*y_muy;
+//             if (dist2d < 16*sigma_sqr)
+//             {
+//                 T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
                 
-                T One_sigma_sqr = 1.0 / (sigma_sqr);
-                T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
-                output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
-                output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
-                output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
-                output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
-            }
-        }
-    }
-}
+//                 T One_sigma_sqr = 1.0 / (sigma_sqr);
+//                 T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
+//                 output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+//                 output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
+//                 output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
+//                 output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
+//             }
+//         }
+//     }
+// }
 
 template<class T>
 __global__ void dose3d_N(T* X, T* Y, T* para, T* dose3d)
@@ -413,7 +455,7 @@ void Gauss2d::cuda_interface(std::vector<T> X, std::vector<T> Y, std::vector<T> 
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
-        dim3 threadsPerBlock(4, 64, 2);
+        dim3 threadsPerBlock(8, 32, 2);
         dim3 numBlocks((Nx*Ny - 1 + threadsPerBlock.x) / threadsPerBlock.x, (N_gaussian - 1 + threadsPerBlock.y) / threadsPerBlock.y,
             (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_iso << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, dose3D_dev_ptr);
@@ -439,15 +481,19 @@ void Gauss2d::cuda_interface_gradient(std::vector<float> X, std::vector<float> Y
     float* para_dev_ptr = thrust::raw_pointer_cast(para_dev.data());
     float* grad_dev_ptr = thrust::raw_pointer_cast(grad_dev.data());
 
-    dim3 threadsPerBlock(8, 8, 8);
-    dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
-        (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
+    
     if (Nz * N_gaussian * 6 == N_para)
     {
+        dim3 threadsPerBlock(8, 8, 8);
+        dim3 numBlocks((Nx - 1 + threadsPerBlock.x) / threadsPerBlock.x, (Ny - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     else if (Nz * N_gaussian * 4 == N_para)
     {
+        dim3 threadsPerBlock(8, 32, 2);
+        dim3 numBlocks((Nx*Ny - 1 + threadsPerBlock.x) / threadsPerBlock.x, (N_gaussian - 1 + threadsPerBlock.y) / threadsPerBlock.y,
+            (Nz - 1 + threadsPerBlock.z) / threadsPerBlock.z);
         dose3d_N_iso_Gradient << <numBlocks, threadsPerBlock >> > (X_dev_ptr, Y_dev_ptr, para_dev_ptr, grad_dev_ptr);
     }
     // copy data back to host
