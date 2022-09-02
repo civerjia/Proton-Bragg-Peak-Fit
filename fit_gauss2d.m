@@ -1,51 +1,53 @@
 x = (((1:128)-64.5)*0.2)';
 y = x;
-xy = [x,y];
-% gauss_para = ([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]);
-gauss_para = ([0.5,-2,-3,1, 0.5,2,3,1]);
 Nz = 1;
 N_gaussian = 2;
-isGPU = 1;
-isGrad = 0;
-dose = gauss2d_optim(gauss_para,xy);
+% calculate dose CPU version
+doseFun = @(gauss_para,xy) Gauss2D(xy(:,1),xy(:,2),gauss_para,Nz,N_gaussian,0,0);
+% gauss_para = ([0.5,-2,-3,1,3,45*pi/180, 0.5,2,3,3,1,15*pi/280]);
+gauss_para = ([0.5,0,0,1, 0.5,0,0,3]);
+dose = doseFun(gauss_para,xy);
 
-x0 = gauss_para + 0.5*rand(1);
+[para,loss]=fit_gauss2d(x,y,N_gaussian,dose);
+function [para,loss]=fit_gauss2d(x,y,N_gaussian,dose)
+Nz = 1;
+isGPU = int32(gpuDeviceCount>0);% if GPU valid, use GPU
+
+dx = abs(x(2)-x(1));
+dy = abs(y(2)-y(1));
+xy = [x,y];
+
+xy_meas = F(dose);
+x_measure = xy_meas(1:128);
+y_measure = xy_meas(129:256);
+[~,arg_x] = max(x_measure);
+[~,arg_y] = max(y_measure);
+mux = x(arg_x);
+muy = y(arg_y);
+S = sum(dose,"all")*dx*dy;
+sigma = max(dose,[],"all")/2/S;
+gauss_para = repmat([S/N_gaussian,mux,muy,sigma],1,N_gaussian);
+
 % lb = (repmat([0,-20,-20,1e-7,1e-7,0],1,N_gaussian));
 % ub = (repmat([1, 20, 20,  10,  10,pi]',1,N_gaussian));
-lb = (repmat([0,-20,-20,1e-7],1,N_gaussian));
-ub = (repmat([1, 20, 20,  10]',1,N_gaussian));
+lb = (repmat([0,-64,-64,1e-6],1,N_gaussian));
+ub = (repmat([1e8, 64, 64,  30]',1,N_gaussian));
 
 options = optimoptions('lsqcurvefit','display','none','SpecifyObjectiveGradient',true);
-[x,resnorm,residual,exitflag,output,lambda,jacobian] = lsqcurvefit(@gauss2d_optim,x0,xy,dose(:),lb,ub,options);
-[dose_x,J] = gauss2d_optim(x,xy);
-resnorm
-e = J - full(jacobian);
-imagesc(reshape(dose,128,128) - reshape(dose_x,128,128));
-%%
-% gradient check
-eps = 1e-6;
-for i = 1:4
-    delta = zeros(1,8);
-    delta(i) = eps;
-    [dose_x2,J] = gauss2d_optim(x+delta,xy);
-    [dose_x1,J] = gauss2d_optim(x,xy);
-    err = J(:,i) - (dose_x2 - dose_x1)/eps;
-    max_err = max(abs(err));
-    assert(max_err < 1e-7,'Max grad err = %f, %dth parameter failed',max_err,i);
-end
-function [F,J] = gauss2d_optim(gauss_para,xy)%[F,J]
-    % depth : 1D double array, size (1,n) or (n,1). unit is cm;
-    % para  : 1D double array, parameter of bortfeld function
-    %         size must be (4*m,1) or (1,4*m)  [range, sigma, slope, Phi]
-    %         m = {1,2,3...}, m denotes the number of bragg peaks
-    isGPU = 1;
-    Nz = evalin('base', 'Nz');
-    N_gaussian = evalin('base', 'N_gaussian');
-    % single(xy(:,1)),single(xy(:,2)),single(gauss_para)
-    F = double(Gauss2D(single(xy(:,1)),single(xy(:,2)),single(gauss_para),Nz,N_gaussian,isGPU,0));% objective function values at x
-    F = F(:);
-    if nargout > 1   % two output arguments
-        % return Jacobian size (Nx*Ny*Nz,N_gauss_para) 
-        J = double(Gauss2D(single(xy(:,1)),single(xy(:,2)),single(gauss_para),Nz,N_gaussian,isGPU,1))';
+[para,loss] = lsqcurvefit(@fun,gauss_para,xy,dose,lb,ub,options);
+
+function [f,j] = fun(gauss_para,xy)
+    f = Gauss2D(xy(:,1),xy(:,2),gauss_para,Nz,N_gaussian,isGPU,0);% objective function values at x
+    if nargout > 1
+        j = Gauss2D(xy(:,1),xy(:,2),gauss_para,Nz,N_gaussian,isGPU,1)';
     end
+end
+end
+%% forward and backward of measure function
+function xy_meas = F(in)
+% in : 2D image, (128,128)
+% xy_meas : (256,1)
+x_measure = sum(in,1)';
+y_measure = sum(in,2);
+xy_meas = [x_measure;y_measure];
 end
