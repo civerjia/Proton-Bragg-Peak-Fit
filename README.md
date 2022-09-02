@@ -11,7 +11,7 @@
 # Upgrading, don't clone right now
 
 # How to use:  
-## windows
+## Windows
 - Pre-compiled functions are provided.
     - `BortfeldFunction.mexw64` Windows with avx2(supported by most of modern x86_64 CPU).
 - If Pre-compiled functions not work, run `./src/compile_PBPF.m` to compile it
@@ -97,15 +97,15 @@ Simulation data `idds.mat` , proton energy at 25:1:180 MeV
 </p>
 
 ## 3D proton dose
-1D IDD is good enough for QA purpose, but for proton radiography, a analytic 3D dose distribution function could be usefull.
+1D IDD is good enough for energy verification, but for proton radiography and other QA purpose, a analytic 2D/3D dose distribution function could be usefull. In most case, double gauss model is accurate enough, I implemented multi-gauss model of two types, isotropic gaussian function($\sigma_x = \sigma_y$) and bivariate gaussian function.
 
-A typical 3D scenario, with range shifter, phantom and water tank(Detector).
+A typical 3D scenario,like Mevion S250i, with range shifter, phantom and water tank(Detector), the proton beam is constrained in a square field.
 
 <p align="center">
 <img src="./images/MLSIC3d_scenario.png" width="500" height="300">
 </p>
 
-A good 3D function is required to fit the 3D dose. the xy dose can be modeled by a 2D mixture gaussian model(for complicate cases), and z dose is modeled by bortfeld function(BF). 
+A good 3D function is required to fit the 3D dose. the xy dose can be modeled by a 2D gaussian based model(Double Gaussian, Gauss-Levy, or Double Gauss-Lorentz Cauchy etc[3]), and z dose is modeled by Bortfeld function(BF). In fact, the sigma of gaussian funciton is depend on depth z and it can be calculate directly from the area under the 2D Gauss function(One Gauss model), but it becomes complicate in multi-Gauss function. For simplicity's sake, sigma of Gauss function are treated as independent variables, this simplified function can be described by:
 
 $$
 \begin{align}
@@ -128,7 +128,55 @@ f(x,y,z) &= BF(z;R,\sigma,\epsilon,\Phi)*\sum_{i=1}^{N}G(x,y;\mu_i,\Sigma_i)\\
 \end{align}
 $$
 
-For a simple 3D water dose, 110MeV proton(simulation data):
+## 2D dose reconstruction
+
+Strip ionization chamber array[4,5] were used for QA purpose, two layers of horizontal and vertical strip detectors were used to locate the proton beam position. With some pprior knowledge of the proton beam profile, it's feasible to reconstruct the 2D/3D dose from a limited number of measurements. Assume the xy resolution is 2mm, strip ionization chamber array usually has 128+128 ADC channels for x,y profile respectively. The measured data can be viewed as the 1D integral along the detector.
+This forward and backward measure function can be defined as:
+```matlab
+function xy_meas = F(in) %forward
+% in : 2D image, (128,128)
+% xy_meas : (256,1)
+x_measure = sum(in,1)';
+y_measure = sum(in,2);
+xy_meas = [x_measure;y_measure];
+end
+function img = Ft(xy_meas)%backward
+% xy_meas : (256,1)
+% img : 2D image, (128,128)
+x_measure = xy_meas(1:128)';
+y_measure = xy_meas(129:256);
+img = repmat(x_measure,128,1) + repmat(y_measure,1,128);
+img = img(:);
+end
+```
+$$
+\argmin_\theta \|F(G(X;\theta)) - m\|^2
+$$
+
+
+<p align="center">
+<img src="./images/dose2d_fit.png" width="800">
+</p>
+
+<center>
+
+| White Noise level(divide by max dose)      | Max Absolute Error( $\frac{\max\|error\|}{max[dose]}$) |
+| ----------- | ----------- |
+| 30%   |0.0441|
+| 20%      | 0.0337      |
+| 10%   | 0.0192        |
+
+</center>
+
+## 3D dose reconstruction
+Only MLSIC can measure a 3D dose in real time[5], The basic structure is demonstrated as below: 
+<p align="center">
+<img src="./images/MLSIC_structure.png" width="800">
+</p>
+The MLSIC compromise 2 high resolution(2mm) X strip and Y strip detectors(128+128) and extra 64 layers of low resolution(8mm) Z(X/Y) strip detectors(32*(8+8)). ZY strip detectors are shifted to achieve higher resolution. The effective FOV is 256mm by 256mm.
+
+
+For a simple 3D proton beam dose, 110MeV proton(TOPAS simulation data):
 
 <p align="center">
 <img src="./images/E110.24.png" width="500" height="500">
@@ -136,7 +184,7 @@ For a simple 3D water dose, 110MeV proton(simulation data):
 
 Fitting 3D dose comprise 2 steps,
 - Fitting 1D IDD curve
-- Fitting 2D dose with gaussian functions layer by layer
+- Fitting 2D dose with gaussian functions layer by layer(or fit as a whole 3D dose)
 
 Related function will be uploaded later.
 
@@ -215,7 +263,7 @@ $$
 
 ### Bortfeld function 
 
-Bortfeld function is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
+Bortfeld function[1] is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
 
 $$
 \begin{align}
@@ -297,8 +345,12 @@ f^{(1,0)}\left(x,a\right) &=
 $$
 
 # Reference :
-- An analytical approximation of the Bragg curve for therapeutic proton beams
-- E. Cojocaru. Parabolic Cylinder Functions (https://www.mathworks.com/matlabcentral/fileexchange/22620-parabolic-cylinder-functions)
+1. [An analytical approximation of the Bragg curve for therapeutic proton beams](https://aapm.onlinelibrary.wiley.com/doi/abs/10.1118/1.598116)
+2. [E. Cojocaru. Parabolic Cylinder Functions](https://www.mathworks.com/matlabcentral/fileexchange/22620-parabolic-cylinder-functions)
+3. [On the parametrization of lateral dose profiles in proton radiation therapy](https://cds.cern.ch/record/2115400/files/Varenna-2015-339.pdf)
+4. [A 2D strip ionization chamber array with high spatiotemporal resolution for proton pencil beam scanning FLASH radiotherapy](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.15706)
+5. [A multi-layer strip ionization chamber (MLSIC) device for proton pencil beam scan quality assurance](https://pubmed.ncbi.nlm.nih.gov/35905730/)
+
 
 # Remark:
 M1 mac openmp issue: https://www.mathworks.com/matlabcentral/answers/1761950-m1-mac-compile-mex-file-with-openmp?s_tid=srchtitle
