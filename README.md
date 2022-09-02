@@ -90,10 +90,10 @@ Zebra data            |  other MLIC data
 |<img src="./images/Zebra_fit.png" width="200" height="200">|   <img src="./images/IDD_fit.png" width="200" height="200">|
 </div>
 
-Simulation data `idds.mat` , proton energy at 25:1:180 MeV
+TOPAS Simulation data `idds.mat` , proton energy at 20:1:227 MeV
 
 <p align="center">
-<img src="./images/idds.png" width="500" height="200">
+<img src="./images/idds.png" width="800">
 </p>
 
 ## 3D proton dose
@@ -142,7 +142,7 @@ xy_meas = [x_measure;y_measure];
 end
 function img = Ft(xy_meas)%backward
 % xy_meas : (256,1)
-% img : 2D image, (128,128)
+% img : 1D image, (128*128,1)
 x_measure = xy_meas(1:128)';
 y_measure = xy_meas(129:256);
 img = repmat(x_measure,128,1) + repmat(y_measure,1,128);
@@ -173,7 +173,7 @@ Only MLSIC can measure a 3D dose in real time[5], The basic structure is demonst
 <p align="center">
 <img src="./images/MLSIC_structure.png" width="800">
 </p>
-The MLSIC compromise 2 high resolution(2mm) X strip and Y strip detectors(128+128) and extra 64 layers of low resolution(8mm) Z(X/Y) strip detectors(32*(8+8)). ZY strip detectors are shifted to achieve higher resolution. The effective FOV is 256mm by 256mm.
+The MLSIC compromise 2 high resolution(2mm) X strip and Y strip detectors(128+128) and extra 64 layers of low resolution(8mm) Z(X/Y) strip detectors(32*(8+8)). ZY strip detectors are shifted to achieve higher resolution. The effective FOV is 256mm by 256mm. The 3D dose (128*128*66)
 
 
 For a simple 3D proton beam dose, 110MeV proton(TOPAS simulation data):
