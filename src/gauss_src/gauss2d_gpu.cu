@@ -205,11 +205,11 @@ __global__ void dose3d_N_iso_Gradient(T* X, T* Y, T* para, T* output)
         T dist2d = x_mux * x_mux + y_muy * y_muy;
         if (dist2d < 16 * sigma_sqr)
         {
-            T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
-
+            T GA = gauss2d(x, y, T(1.0), mux1, muy1, sigma1); // avoid G/A when A is small
+            T G = A1 *GA;
             T One_sigma_sqr = 1.0 / (sigma_sqr);
             T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
-            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+            output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = GA;                      // dG/dA
             output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
             output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
             output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
@@ -343,7 +343,8 @@ __global__ void dose3d_N_Gradient(float* X, float* Y, float* para, float* output
             float sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
             float sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
             float beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
-            float G = mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+            float GA = mvn2d(x, y, 1.0f, mux, muy, sigma1, sigma2, beta);
+            float G = A * GA;
             float sigma1_sqr = sigma1 * sigma1;
             float sigma2_sqr = sigma2 * sigma2;
             float One_sigma1_sqr = 1.0f / (sigma1_sqr);
@@ -363,7 +364,7 @@ __global__ void dose3d_N_Gradient(float* X, float* Y, float* para, float* output
             float w3 = (S1 - 1.0f) / (sigma1);
             float w4 = (S2 - 1.0f) / (sigma2);
             float w5 = Y1 * Y2 * (One_sigma1_sqr - One_sigma2_sqr);
-            output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = G / (A);    // dG/dA
+            output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = GA;    // dG/dA
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 1] = w1 * G; // dG/dmux
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 2] = w2 * G; // dG/dmuy
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 3] = w3 * G; // dG/ds1
@@ -400,7 +401,8 @@ __global__ void dose3d_N_Gradient(double* X, double* Y, double* para, double* ou
             double sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
             double sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
             double beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
-            double G = mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+            double GA = mvn2d(x, y, 1.0, mux, muy, sigma1, sigma2, beta);
+            double G = A * GA;
             double sigma1_sqr = sigma1 * sigma1;
             double sigma2_sqr = sigma2 * sigma2;
             double One_sigma1_sqr = 1.0 / (sigma1_sqr);
@@ -420,7 +422,7 @@ __global__ void dose3d_N_Gradient(double* X, double* Y, double* para, double* ou
             double w3 = (S1 - 1.0) / (sigma1);
             double w4 = (S2 - 1.0) / (sigma2);
             double w5 = Y1 * Y2 * (One_sigma1_sqr - One_sigma2_sqr);
-            output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = G / (A);    // dG/dA
+            output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = GA;    // dG/dA
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 1] = w1 * G; // dG/dmux
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 2] = w2 * G; // dG/dmuy
             output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 3] = w3 * G; // dG/ds1

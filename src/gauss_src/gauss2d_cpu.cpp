@@ -167,11 +167,11 @@ void dose3d_N_iso_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  p
                     T dist2d = x_mux*x_mux + y_muy*y_muy;
                     if (dist2d < 16*sigma_sqr)
                     {
-                        T G = gauss2d(x, y, A1, mux1, muy1, sigma1); // avoid G/A when A is small
-                        
+                        T GA = gauss2d(x, y, T(1.0), mux1, muy1, sigma1); // avoid G/A when A is small
+                        T G = A1 * GA;
                         T One_sigma_sqr = 1.0 / (sigma_sqr);
                         T w = (x_mux * x_mux + y_muy * y_muy - 2.0 * sigma_sqr) / (sigma1 * sigma_sqr);
-                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = G / (A1);                      // dG/dA
+                        output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng] = GA;                      // dG/dA
                         output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 1] = x_mux * One_sigma_sqr * G; // dG/dmux
                         output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 2] = y_muy * One_sigma_sqr * G; // dG/dmuy
                         output[idx3d * N_gauss_para + nz * N_gaussian * 4 + 4 * ng + 3] = w * G;                     // dG/ds
@@ -234,7 +234,8 @@ void dose3d_N_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  para,
                     T sigma1 = para[nz * N_gaussian * 6 + 6 * ng + 3];
                     T sigma2 = para[nz * N_gaussian * 6 + 6 * ng + 4];
                     T beta = para[nz * N_gaussian * 6 + 6 * ng + 5];
-                    T G = mvn2d(x, y, A, mux, muy, sigma1, sigma2, beta);
+                    T GA = mvn2d(x, y, T(1.0), mux, muy, sigma1, sigma2, beta);
+                    T G = A * GA;
                     T sigma1_sqr = sigma1 * sigma1;
                     T sigma2_sqr = sigma2 * sigma2;
                     T One_sigma1_sqr = 1.0 / (sigma1_sqr);
@@ -254,7 +255,7 @@ void dose3d_N_Gradient(std::vector<T> X, std::vector<T> Y, std::vector<T>  para,
                     T w3 = (S1 - 1.0) / (sigma1);
                     T w4 = (S2 - 1.0) / (sigma2);
                     T w5 = Y1 * Y2 * (One_sigma1_sqr - One_sigma2_sqr);
-                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = G / (A);    // dG/dA
+                    output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng] = GA;    // dG/dA
                     output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 1] = w1 * G; // dG/dmux
                     output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 2] = w2 * G; // dG/dmuy
                     output[idx3d * N_gauss_para + nz * N_gaussian * 6 + 6 * ng + 3] = w3 * G; // dG/ds1
