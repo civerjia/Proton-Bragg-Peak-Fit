@@ -7,7 +7,7 @@
 3. Proton Radiography/CT with feature 1 and 2
 
 ---
-- Provide IDD measurement data and simulation data, data acquired from Zebra and other MLIC which can be used in Proton Radiographics
+- Provide IDD measurement data and simulation data, data acquired from Zebra and MLSIC which can be used in Proton Radiographics
 - Bortfeld function implemented in C++, provide IDD, mean gradient and jacobian outputs.
 - Input Integral Depth Dose(IDD) is suggested to rescale to [0,10] or nomalize to [0,1], but it's ok to fit raw data in any scale
 - Compiled with Visual Studio + Intel OneAPI, faster than mex in MATLAB. Highly recommanded to compile the src with VS and Intel OneAPI
@@ -84,14 +84,14 @@ output = bf_mex((1:64)'*0.3,[15,0.3,1e-3,0.4, 12,0.4,1e-3,0.4],'jacobian')
 % ProtonDose3D GPU time: single(0.493263s), double(0.537123s)
 % ProtonDose3D CPU time: single(0.751850s), double(0.496489s)
 ```
-
+s5cuGAUFbX1a
 ## 1D IDD data
 Applications can be found in `./utils/demo.m` and data stored in `./data/`. Be careful, run the demo section by section, some parts are time comsuming.
 
 
 <div align="center">
 
-Zebra data            |  other MLIC data
+Zebra data            |  MLSIC data
 :-------------------------:|:-------------------------:
 |<img src="./images/Zebra_fit.png" width="400" >|   <img src="./images/IDD_fit.png" width="400" >|
 </div>
