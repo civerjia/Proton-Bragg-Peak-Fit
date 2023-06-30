@@ -14,9 +14,11 @@
 - Support Apple Silicon (Matlab R2022a, Matlab R2022a beta don't have toolboxs)
 - Image Processing Toolbox, Optimization Toolbox and Signal Processing Toolbox required
 
-# Working in progress, bragg-peak fitting are ready to use.
+# bragg-peak fitting are ready to use.
+Dose reconstruction Working in progress
 
 # How to use:  
+examples: ./utils/demo.m
 ## Windows
 - Pre-compiled functions are provided.
     - `BortfeldFunction.mexw64` Windows with avx2(supported by most of modern x86_64 CPU).
