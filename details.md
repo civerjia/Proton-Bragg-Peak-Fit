@@ -172,6 +172,7 @@ $$
 ### Double Gauss Cauchy-Lorentz function
 Triple Gaussian function can fit the lateral dose profile well, but it's hard to learn the secondary tail dose. And it's not easy to identify the major gaussian function. Double Gauss Cauchy-Lorentz function provide a more realistic solution for proton lateral dose profile. Cauchy-Lorentz function can easily fit the tail dose without fancy tricks.
 $$
+
 \begin{align}
 f(x;\theta) &= \frac{w_1}{\pi}\frac{b}{(x-\mu)^2+b^2}
 + \frac{w_{2}}{\sqrt{2\pi}\sigma_{2}}e^{-\frac{(x - \,\mu)^{2}}{2\sigma_{2}^{2}}}
@@ -277,13 +278,16 @@ z^{a}e^{\frac{-z^{2}}{4}}(1-\frac{a(a-1)}{4z^{2}}) \;\; &z>t_{2}\\
 \end{cases}\\
 \end{align}
 $$
+
 $F_{1}$ is confluent hypergeometry function(laplace approximation).
+
 $$
 \begin{align}
 F_{1}(a,b,x) &\approx \frac{b^{b- \frac{1}{2}}}{\sqrt{\frac{y^{2}}{a}+ \frac{(1-y)^{2}}{b-a}}} (\frac{y}{a})^{a}(\frac{1-y}{b-a})^{b-a}e^{xy}\\
 y &= \frac{2a}{b-x+\sqrt{(x-b)^{2}+4ax}}
 \end{align}
 $$
+
 when $a=-1.565$ the optimal threshold are $t_{1}=1.4$ and $t_{2}=1.6$ 
 
 when $a=-0.565$ the optimal threshold are $t_{1}=1.9$ and $t_{2}=1.8$ 
