@@ -6,7 +6,7 @@ function [x] = fast_fit(depth,idd_i,num_bp)
     % return ->
     % x     : parameters of bortfeld function (4*num_bp,1)
     %         (R1,sigma1,epsilon1,Phi1),(R2,sigma2,epsilon2,Phi2) ... 
-    fun = @(para,z) bf_mex(z,para,'idd');
+    fun = @(para,z) bf_mex(z,para,'idd',1);
     z_max = max(depth);
     [v,i] = maxk(abs(diff(medfilt1(idd_i,3))),num_bp);
     %para0 = [zr,0.07*zr,1e-3,zv*zr*1e-2];% prior
