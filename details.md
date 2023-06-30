@@ -169,6 +169,16 @@ S[2] &= \frac{\left[\sin (\beta ) \left(x-\mu _1\right)+\cos (\beta ) \left(y-\m
 \end{align}
 $$
 
+### Double Gauss Cauchy-Lorentz function
+Triple Gaussian function can fit the lateral dose profile well, but it's hard to learn the secondary tail dose. And it's not easy to identify the major gaussian function. Double Gauss Cauchy-Lorentz function provide a more realistic solution for proton lateral dose profile. Cauchy-Lorentz function can easily fit the tail dose without fancy tricks.
+$$
+\begin{align}
+f(x;\theta) &= \frac{w_1}{\pi}\frac{b}{(x-\mu)^2+b^2}
++ \frac{w_{2}}{\sqrt{2\pi}\sigma_{2}}e^{-\frac{(x - \,\mu)^{2}}{2\sigma_{2}^{2}}}
++  \frac{w_{3}}{\sqrt{2\pi}\sigma_{3}}e^{-\frac{(x - \,\mu)^2}{2\sigma_{3}^{2}}}
+\end{align}
+$$
+
 ### Bortfeld function 
 
 Bortfeld function[1] is an analytical approximation of the Bragg curve for therapeutic proton beams, given by
@@ -251,3 +261,29 @@ f^{(1,0)}\left(x,a\right) &=
 &-\frac{\Phi_0 (R_0-z) e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{2 (0.012 R_0+1) \sigma^{1.435}}
 \end{align}
 $$
+
+Because parabolic cylinder funciton is slow to compute, I proposed a new approximation, this function can approximate PCF without iteration.It was modified from the asymptotic expansions.
+reference 
+1. I. S. Gradshteyn and I. M. Ryzhik,Table of Integrals, Series and Prod-ucts~Academic, San Diego, 1980 **page 1028**
+2. Butler, Roland W., and Andrew TA Wood. "Laplace approximations for hypergeometric functions with matrix argument." The Annals of Statistics 30.4 (2002): 1155-1177.
+   
+$$
+\begin{align}
+D_{a}(z) &\approx 
+\begin{cases}
+\frac{\sqrt{2\pi}}{\Gamma(-a)}(-z)^{-p-1}e^{\frac{z^{2}}{4}}(1+ \frac{(a+1)(a+2)}{2z^{2}})\;\;&z <  -t_{1}\\
+2^{\frac{a}{2}}e^{\frac{-z^{2}}{4}}\left(\frac{\sqrt{\pi}}{\Gamma(\frac{1-a}{2})}F_{1}\left(\frac{-a}{2},0.5,\frac{z^{2}}{2}\right)-         \frac{\sqrt{2\pi}z}{\Gamma(\frac{-a}{2})}F_{1}\left(\frac{1-a}{2},1.5,\frac{z^{2}}{2}\right)\right) \;\; &-t_{1}\le z \le t_{2} \\
+z^{a}e^{\frac{-z^{2}}{4}}(1-\frac{a(a-1)}{4z^{2}}) \;\; &z>t_{2}\\
+\end{cases}\\
+\end{align}
+$$
+$F_{1}$ is confluent hypergeometry function(laplace approximation).
+$$
+\begin{align}
+F_{1}(a,b,x) &\approx \frac{b^{b- \frac{1}{2}}}{\sqrt{\frac{y^{2}}{a}+ \frac{(1-y)^{2}}{b-a}}} (\frac{y}{a})^{a}(\frac{1-y}{b-a})^{b-a}e^{xy}\\
+y &= \frac{2a}{b-x+\sqrt{(x-b)^{2}+4ax}}
+\end{align}
+$$
+when $a=-1.565$ the optimal threshold are $t_{1}=1.4$ and $t_{2}=1.6$ 
+
+when $a=-0.565$ the optimal threshold are $t_{1}=1.9$ and $t_{2}=1.8$ 
