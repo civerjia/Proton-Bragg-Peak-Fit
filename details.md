@@ -57,6 +57,7 @@ img = repmat(x_measure,128,1) + repmat(y_measure,1,128);
 img = img(:);
 end
 ```
+
 $$
 \argmin_\theta \|F(G(X;\theta)) - m\|^2
 $$
@@ -174,9 +175,7 @@ Triple Gaussian function can fit the lateral dose profile well, but it's hard to
 
 $$
 \begin{align}
-f(x;\theta) &= \frac{w_1}{\pi}\frac{b}{(x-\mu)^2+b^2}
-+ \frac{w_{2}}{\sqrt{2\pi}\sigma_{2}}e^{-\frac{(x - \,\mu)^{2}}{2\sigma_{2}^{2}}}
-+  \frac{w_{3}}{\sqrt{2\pi}\sigma_{3}}e^{-\frac{(x - \,\mu)^2}{2\sigma_{3}^{2}}}
+f(x;\theta) &= \frac{w_1}{\pi}\frac{b}{(x-\mu)^2+b^2} + \frac{w_{2}}{\sqrt{2\pi}\sigma_{2}}e^{-\frac{(x - \,\mu)^{2}}{2\sigma_{2}^{2}}} + \frac{w_{3}}{\sqrt{2\pi}\sigma_{3}}e^{-\frac{(x - \,\mu)^2}{2\sigma_{3}^{2}}}
 \end{align}
 $$
 
@@ -233,30 +232,25 @@ $$
 \begin{align}
 \frac{\partial\hat D}{\partial R_0} &= 
 \frac{\Phi_0 \left(-\frac{31.7 \epsilon (R_0-z)^{0.565}}{R_0^2}+\frac{0.565 \left(\frac{31.7 \epsilon}{R_0}+0.444\right)}{(R_0-z)^{0.435}}-\frac{7.79955}{(R_0-z)^{1.435}}\right)}{0.012 R_0+1}\\
-&-\frac{0.012 \Phi_0 \left(\left(\frac{31.7 \epsilon}{R_0}+0.444\right) (R_0-z)^{0.565}+\frac{17.93}{(R_0-z)^{0.435}}\right)}{(0.012 R_0+1)^2}
-\\
-\frac{\partial\hat D}{\partial \epsilon} &= \frac{31.7 \Phi_0 (R_0-z)^{0.565}}{(0.012 R_0+1) R_0}
-\\
+&-\frac{0.012 \Phi_0 \left(\left(\frac{31.7 \epsilon}{R_0}+0.444\right) (R_0-z)^{0.565}+\frac{17.93}{(R_0-z)^{0.435}}\right)}{(0.012 R_0+1)^2}\\
+\frac{\partial\hat D}{\partial \epsilon} &= \frac{31.7 \Phi_0 (R_0-z)^{0.565}}{(0.012 R_0+1) R_0}\\
 \frac{\partial D}{\partial \epsilon} &= 
-\frac{11.26 \Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} f\left(\frac{z-R_0}{\sigma},-1.565\right)}{(0.012 R_0+1) R_0}
-\\
+\frac{11.26 \Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} f\left(\frac{z-R_0}{\sigma},-1.565\right)}{(0.012 R_0+1) R_0}\\
 \frac{\partial D}{\partial \sigma} &=
 \frac{\Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(-\frac{(z-R_0) \left(\frac{11.26 \epsilon }{R_0}+0.157\right) f^{(1,0)}\left(\frac{z-R_0}{\sigma},-1.565\right)}{\sigma^2}-\frac{11.26 (z-R_0) f^{(1,0)}\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma^3}-\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma^2}\right)}{0.012 R_0+1}\\
 &+\frac{0.565 \Phi_0 e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{(0.012 R_0+1) \sigma^{0.435}}\\
 &+\frac{\Phi_0 (R_0-z)^2 e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{2 (0.012 R_0+1) \sigma^{2.435}}
-\\
 \end{align}
 $$
 
+continue
 
 $$
 \begin{align}
 f\left(\frac{z-R_0}{\sigma},a\right) &=
-\mathfrak{D}_{a}(\frac{z-R_0}{\sigma})
-\\
+\mathfrak{D}_{a}(\frac{z-R_0}{\sigma})\\
 f^{(1,0)}\left(x,a\right) &= 
-\frac{\partial \mathfrak{D}_{a}(x)}{\partial x}
-\\
+\frac{\partial \mathfrak{D}_{a}(x)}{\partial x}\\
 \frac{\partial D}{\partial R_0} &=
 \frac{\Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(-\frac{11.26 f^{(1,0)}\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma^2}-\frac{\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f^{(1,0)}\left(\frac{z-R_0}{\sigma},-1.565\right)}{\sigma}-\frac{11.26 \epsilon  f\left(\frac{z-R_0}{\sigma},-1.565\right)}{R_0^2}\right)}{0.012 R_0+1}\\
 &+\frac{0.012 (-1) \Phi_0 \sigma^{0.565} e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{(0.012 R_0+1)^2}\\
