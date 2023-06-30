@@ -81,46 +81,102 @@ void BP::IDD_array_v2(T* depth, T* dose_o, int size, T R0, T sigma, T epsilon, T
         *(dose_o + i) = BP::IDDV2(depth[i], R0, sigma, epsilon, Phi, a, b, c, d);
     }
 }
+// template<class T>
+// void BP::grad(T z, T* grad4_o, T r, T s, T e, T p)
+// {
+//     T dBhat_dr{}, dBhat_de{}, dBhat_dp{}, dB_dr{}, dB_ds{}, dB_de{}, dB_dp{};
+//     // define some commonly used values
+//     T r_sqr = r * r;
+//     T r_z = r - z;
+//     T r_z_sqr = r_z * r_z;
+//     T s_sqr = s * s;
+
+//     T pow_s_0565 = pow(s, T(0.565));
+//     T pow_r_z_0565 = pow(r_z, T(0.565));
+//     T pow_r_z_0435 = pow(r_z, T(0.435));
+//     T r_hat = T(1 + 0.012 * r);
+//     T pow_1012r_2 = pow(r_hat, 2);
+
+//     T exp_val = exp(r_z_sqr / ((T)4.0 * s_sqr));
+
+//     T D_0565 = static_cast<T>(PCF::call_D(-(r_z / s), -0.565));
+//     T D_1565 = static_cast<T>(PCF::call_D(-(r_z / s), -1.565));
+
+//     T dD_0565 = static_cast<T>(PCF::call_dD(-r_z / s, -0.565));
+//     T dD_1565 = static_cast<T>(PCF::call_dD(-r_z / s, -1.565));
+
+//     T B2_scale = ((T)0.157 + ((T)11.26 * e) / r);
+//     T Bhat2_scale = ((T)0.444 + (T)31.7*e / r);
+//     dBhat_dr = (-(T)0.012 * p * ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565)) / pow_1012r_2 +
+//         (p * (-(T)7.79955 / pow(r_z, (T)1.435) + ((T)0.565 * Bhat2_scale) / pow_r_z_0435 - ((T)31.7*e * pow_r_z_0565) / (r_sqr))) / r_hat;
+//     dBhat_de = ((T)31.7 * p * pow_r_z_0565) / (r + (T)0.012 * r_sqr);
+//     dBhat_dp = ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565) / r_hat;
+
+//     dB_dr = (-(T)0.012 * p * pow_s_0565 * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * pow_1012r_2) -
+//         (p * r_z * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / ((T)2.0 * exp_val * r_hat * pow(s, (T)1.435)) +
+//         (p * pow_s_0565 * ((-(T)11.26 * e * D_1565) / (r_sqr) - ((T)11.26 * dD_0565) / s_sqr - (B2_scale * dD_1565) / s)) / (exp_val * r_hat);
+//     dB_ds = ((T)0.565 * p * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * r_hat * pow(s, (T)0.435)) +
+//         (p * r_z_sqr * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / ((T)2.0 * exp_val * r_hat * pow(s, (T)2.435)) +
+//         (p * pow_s_0565 * ((-(T)11.26 * D_0565) / s_sqr + ((T)11.26 * r_z * dD_0565) / (s_sqr * s) + (B2_scale * r_z * dD_1565) / s_sqr)) / (exp_val * r_hat);
+
+//     dB_de = ((T)11.26 * p * (pow_s_0565) * D_1565) / (exp_val * r_hat * r);
+//     dB_dp = (pow_s_0565 * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * r_hat);
+//     if (z < r - 10.0 * s)
+//     {
+//         grad4_o[0] = dBhat_dr;
+//         grad4_o[1] = 0.0;
+//         grad4_o[2] = dBhat_de;
+//         grad4_o[3] = dBhat_dp;
+//     }
+//     else if ((r - 10.0 * s <= z) && (z <= r + 5.0 * s))
+//     {
+//         grad4_o[0] = dB_dr;
+//         grad4_o[1] = dB_ds;
+//         grad4_o[2] = dB_de;
+//         grad4_o[3] = dB_dp;
+//     }
+//     else
+//     {
+//         grad4_o[0] = 0.0;
+//         grad4_o[1] = 0.0;
+//         grad4_o[2] = 0.0;
+//         grad4_o[3] = 0.0;
+//     }
+// }
 template<class T>
 void BP::grad(T z, T* grad4_o, T r, T s, T e, T p)
 {
-    T dBhat_dr{}, dBhat_de{}, dBhat_dp{}, dB_dr{}, dB_ds{}, dB_de{}, dB_dp{};
+    // analytical gradient of Bragg_hat
+    T dBhat_dr{}, dBhat_de{}, dBhat_dp{};
     // define some commonly used values
     T r_sqr = r * r;
     T r_z = r - z;
-    T r_z_sqr = r_z * r_z;
-    T s_sqr = s * s;
 
-    T pow_s_0565 = pow(s, T(0.565));
     T pow_r_z_0565 = pow(r_z, T(0.565));
     T pow_r_z_0435 = pow(r_z, T(0.435));
     T r_hat = T(1 + 0.012 * r);
     T pow_1012r_2 = pow(r_hat, 2);
 
-    T exp_val = exp(r_z_sqr / ((T)4.0 * s_sqr));
-
-    T D_0565 = static_cast<T>(PCF::call_D(-(r_z / s), -0.565));
-    T D_1565 = static_cast<T>(PCF::call_D(-(r_z / s), -1.565));
-
-    T dD_0565 = static_cast<T>(PCF::call_dD(-r_z / s, -0.565));
-    T dD_1565 = static_cast<T>(PCF::call_dD(-r_z / s, -1.565));
-
-    T B2_scale = ((T)0.157 + ((T)11.26 * e) / r);
     T Bhat2_scale = ((T)0.444 + (T)31.7*e / r);
     dBhat_dr = (-(T)0.012 * p * ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565)) / pow_1012r_2 +
         (p * (-(T)7.79955 / pow(r_z, (T)1.435) + ((T)0.565 * Bhat2_scale) / pow_r_z_0435 - ((T)31.7*e * pow_r_z_0565) / (r_sqr))) / r_hat;
     dBhat_de = ((T)31.7 * p * pow_r_z_0565) / (r + (T)0.012 * r_sqr);
     dBhat_dp = ((T)17.93 / pow_r_z_0435 + Bhat2_scale * pow_r_z_0565) / r_hat;
 
-    dB_dr = (-(T)0.012 * p * pow_s_0565 * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * pow_1012r_2) -
-        (p * r_z * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / ((T)2.0 * exp_val * r_hat * pow(s, (T)1.435)) +
-        (p * pow_s_0565 * ((-(T)11.26 * e * D_1565) / (r_sqr) - ((T)11.26 * dD_0565) / s_sqr - (B2_scale * dD_1565) / s)) / (exp_val * r_hat);
-    dB_ds = ((T)0.565 * p * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * r_hat * pow(s, (T)0.435)) +
-        (p * r_z_sqr * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / ((T)2.0 * exp_val * r_hat * pow(s, (T)2.435)) +
-        (p * pow_s_0565 * ((-(T)11.26 * D_0565) / s_sqr + ((T)11.26 * r_z * dD_0565) / (s_sqr * s) + (B2_scale * r_z * dD_1565) / s_sqr)) / (exp_val * r_hat);
+    // use numerical differentiation for the gradient of Bragg function
+    T dB_dr{}, dB_ds{}, dB_de{}, dB_dp{};
+    T h = 1e-6;
+    T B0, B1;
+    B0 = IDD(z, r, s, e, p);
+    B1 = IDD(z, r + h, s, e, p);
+    dB_dr = (B1 - B0) / h;
+    B1 = IDD(z, r, s + h, e, p);
+    dB_ds = (B1 - B0) / h;
+    B1 = IDD(z, r, s, e + h, p);
+    dB_de = (B1 - B0) / h;
+    B1 = IDD(z, r, s, e, p + h);
+    dB_dp = (B1 - B0) / h;
 
-    dB_de = ((T)11.26 * p * (pow_s_0565) * D_1565) / (exp_val * r_hat * r);
-    dB_dp = (pow_s_0565 * (((T)11.26 * D_0565) / s + B2_scale * D_1565)) / (exp_val * r_hat);
     if (z < r - 10.0 * s)
     {
         grad4_o[0] = dBhat_dr;
