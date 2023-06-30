@@ -1,6 +1,6 @@
 % help function of BortfeldFunction.mexw64
 % author : shuang zhou civerjia@gmail.com
-% How to use: BortfeldFunction(depth,para,idx);
+% How to use: BortfeldFunction(depth,para,idx); or BortfeldFunction(depth,para,idx,1); to use fast version(lower precision)
 % depth : 1D double/single array, size (1,n) or (n,1). unit is cm;
 % para  : 1D double/single array, parameter of bortfeld function 
 %         size must be (4*m,1) or (1,4*m)
