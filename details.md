@@ -171,8 +171,8 @@ $$
 
 ### Double Gauss Cauchy-Lorentz function
 Triple Gaussian function can fit the lateral dose profile well, but it's hard to learn the secondary tail dose. And it's not easy to identify the major gaussian function. Double Gauss Cauchy-Lorentz function provide a more realistic solution for proton lateral dose profile. Cauchy-Lorentz function can easily fit the tail dose without fancy tricks.
-$$
 
+$$
 \begin{align}
 f(x;\theta) &= \frac{w_1}{\pi}\frac{b}{(x-\mu)^2+b^2}
 + \frac{w_{2}}{\sqrt{2\pi}\sigma_{2}}e^{-\frac{(x - \,\mu)^{2}}{2\sigma_{2}^{2}}}
@@ -248,6 +248,7 @@ $$
 \end{align}
 $$
 
+
 $$
 \begin{align}
 f\left(\frac{z-R_0}{\sigma},a\right) &=
@@ -262,6 +263,7 @@ f^{(1,0)}\left(x,a\right) &=
 &-\frac{\Phi_0 (R_0-z) e^{-\frac{(R_0-z)^2}{4 \sigma^2}} \left(\left(\frac{11.26 \epsilon }{R_0}+0.157\right) f\left(\frac{z-R_0}{\sigma},-1.565\right)+\frac{11.26 f\left(\frac{z-R_0}{\sigma},-0.565\right)}{\sigma}\right)}{2 (0.012 R_0+1) \sigma^{1.435}}
 \end{align}
 $$
+
 
 Because parabolic cylinder funciton is slow to compute, I proposed a new approximation, this function can approximate PCF without iteration.It was modified from the asymptotic expansions.
 reference 
