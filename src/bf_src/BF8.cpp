@@ -34,7 +34,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             mex_type1 *Z{}, *para{};
             Z = (mex_type1 *)mxGetPr(prhs[0]);
             para = (mex_type1 *)mxGetPr(prhs[1]);
-            int idx = int(*mxGetPr(prhs[2]));
             {
                 // get dose
                 const mwSize size[2]{dim_Z[0], dim_Z[1]};
