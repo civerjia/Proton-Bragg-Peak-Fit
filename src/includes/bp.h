@@ -27,6 +27,8 @@ namespace BP
 	template <class T>
 	void IDD_array_N(T* depth, T* dose_o, T* para_i, int size, int para_size);
 	template <class T>
+	void IDD_array_N_v2(T* depth, T* dose_o, T* para_i, int size, int para_size);
+	template <class T>
 	void get_mean_grad(T* depth, T* grad_o, T* para_i, int size, int para_size);
 	template <class T>
 	void get_jacobian(T* depth, T* grad_o, T* para_i, int size, int para_size);

@@ -26,11 +26,11 @@ T BP::IDDV2(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T d)
     // reference : Zhang, Xiaodong, et al. "Parameterization of multiple Bragg curves for scanning proton beams using simultaneous fitting of multiple curves." Physics in Medicine & Biology 56.24 (2011): 7725.
     T dose{};
     // analytical bragg curve
-    if (depth < R0 - 10.0 * sigma)
+    if (depth < R0 - 4.0 * sigma)
     {
         dose = Bragg_hat(depth, R0, sigma, epsilon, Phi) + a * pow(R0 - depth, 3.0) + b * pow(R0 - depth, 2.0) + c * (R0 - depth) + d;
     }
-    else if (R0 - 10.0 * sigma <= depth && depth <= R0 + 5.0 * sigma)
+    else if (R0 - 4.0 * sigma <= depth && depth <= R0 + 5.0 * sigma)
     {
         dose = Bragg(depth, R0, sigma, epsilon, Phi);
     }
@@ -314,7 +314,20 @@ void BP::fitBragg(T* z, T* dose, int size, T* para, T* lambda, int niter, T* idd
     }
 }
 
-
+template<class T>
+void BP::IDD_array_N_v2(T* depth, T* dose_o, T* para_i, int size, int para_size)
+{
+#pragma omp parallel for
+    for (int i = 0; i < size; ++i)
+    {
+        T temp{};
+        for (int k = 0; k < para_size; k = k + 8)// multi-bf mixture
+        {
+            temp += BP::IDDV2(depth[i], para_i[k], para_i[k + 1], para_i[k + 2], para_i[k + 3], para_i[k + 4], para_i[k + 5], para_i[k + 6], para_i[k + 7]);
+        }
+        dose_o[i] = temp;
+    }
+}
 template<class T>
 void BP::IDD_array_N(T* depth, T* dose_o, T* para_i, int size, int para_size)
 {
@@ -389,6 +402,7 @@ template void BP::grad(double z, double* grad4_o, double r, double s, double e, 
 template void BP::grad_array(double* z, double* grad_o, int size, double* para);
 template void BP::fitBragg(double* z, double* dose, int size, double* para, double* lambda, int niter, double* idd_o, double* loss_o, double* para_o, double& Lmin);
 template void BP::IDD_array_N(double* depth, double* dose_o, double* para_i, int size, int para_size);
+template void BP::IDD_array_N_v2(double* depth, double* dose_o, double* para_i, int size, int para_size);
 template void BP::get_mean_grad(double* depth, double* grad_o, double* para_i, int size, int para_size);
 template void BP::get_jacobian(double* depth, double* grad_o, double* para_i, int size, int para_size);
 
@@ -402,5 +416,6 @@ template void BP::grad(float z, float* grad4_o, float r, float s, float e, float
 template void BP::grad_array(float* z, float* grad_o, int size, float* para);
 template void BP::fitBragg(float* z, float* dose, int size, float* para, float* lambda, int niter, float* idd_o, float* loss_o, float* para_o, float& Lmin);
 template void BP::IDD_array_N(float* depth, float* dose_o, float* para_i, int size, int para_size);
+template void BP::IDD_array_N_v2(float* depth, float* dose_o, float* para_i, int size, int para_size);
 template void BP::get_mean_grad(float* depth, float* grad_o, float* para_i, int size, int para_size);
 template void BP::get_jacobian(float* depth, float* grad_o, float* para_i, int size, int para_size);
