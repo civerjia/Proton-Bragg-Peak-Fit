@@ -484,7 +484,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     { // input 2 arguments, depth and parameter
         if (mxIsSingle(prhs[0]) && mxIsSingle(prhs[1])){
             // single precision
-            if (N_bp == 7)
+            if (dim_para[0] == 7)
             {
                 float * Z = (float *)mxGetPr(prhs[0]);
                 float * para = (float *)mxGetPr(prhs[1]);
@@ -497,7 +497,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     D7_multi(Z, idd_o_ptr, para, Nz, N_para);
                 }
             }
-            else if (dim_para[0] % 4 == 0)
+            else if (dim_para[0] == 4)
             {
                 float * Z = (float *)mxGetPr(prhs[0]);
                 float * para = (float *)mxGetPr(prhs[1]);
@@ -519,7 +519,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
             // double precision
             // mexPrintf("double pricision\n");
-            if (dim_para[0] % 7 == 0)
+            if (dim_para[0] == 7)
             {
                 double * Z = (double *)mxGetPr(prhs[0]);
                 double * para = (double *)mxGetPr(prhs[1]);
@@ -532,7 +532,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     D7_multi(Z, idd_o_ptr, para, Nz, N_para);
                 }
             }
-            else if (dim_para[0] % 4 == 0)
+            else if (dim_para[0] == 4)
             {
                 double * Z = (double *)mxGetPr(prhs[0]);
                 double * para = (double *)mxGetPr(prhs[1]);
@@ -560,7 +560,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // input 3 arguments, depth, parameter, and derivative
         if (mxIsSingle(prhs[0]) && mxIsSingle(prhs[1])){
             // single precision
-            if (N_bp == 7)
+            if (dim_para[0] == 7)
             {
                 float * Z = (float *)mxGetPr(prhs[0]);
                 float * para = (float *)mxGetPr(prhs[1]);
@@ -573,7 +573,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     dD7_multi(Z, derivative_o_ptr, para, Nz, N_para);
                 }
             }
-            else if (dim_para[0] % 4 == 0)
+            else if (dim_para[0] == 4)
             {
                 float * Z = (float *)mxGetPr(prhs[0]);
                 float * para = (float *)mxGetPr(prhs[1]);
@@ -595,7 +595,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
             // double precision
             // mexPrintf("double pricision\n");
-            if (dim_para[0] % 7 == 0)
+            if (dim_para[0] == 7)
             {
                 double * Z = (double *)mxGetPr(prhs[0]);
                 double * para = (double *)mxGetPr(prhs[1]);
@@ -608,7 +608,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     dD7_multi(Z, derivative_o_ptr, para, Nz, N_para);
                 }
             }
-            else if (dim_para[0] % 4 == 0)
+            else if (dim_para[0] == 4)
             {
                 double * Z = (double *)mxGetPr(prhs[0]);
                 double * para = (double *)mxGetPr(prhs[1]);
