@@ -335,7 +335,7 @@ T D4(T depth, T R0, T sigma, T epsilon, T Phi)
     return dose;
 }
 template<class T>
-T dD4(T depth, T R0, T sigma, T epsilon, T Phi, T *d){
+void dD4(T depth, T R0, T sigma, T epsilon, T Phi, T *d){
     // derivative of D4 respect to R0, sigma, epsilon, Phi
     if (depth < R0 - T(10.0) * sigma){
         dB1(depth, R0, sigma, epsilon, Phi, d);
@@ -374,7 +374,7 @@ T D7(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c)
     return dose;
 }
 template<class T>
-T dD7(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T *derivative){
+void dD7(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T *derivative){
     T edge = R0 - T(10.0) * sigma;
     T dedge_dr = 1.0;
     T dedge_ds = -T(10.0);
