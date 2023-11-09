@@ -36,9 +36,9 @@ template<class T>
 T dfdx(T *p, T *q, T x){
     // derivative of f
     // part1 = (5p0*x^4 + 4p1*x^3 + 3p2*x^2 + 2p3*x^1 + p4)/(x^4+q0*x^3+q1*x^2+q2*x+q3)
-    T part1 = (T(5) * p[0] + x * (T(4) * p[1] + x * (T(3) * p[2] + x * (T(2) * p[3] + x * T(1) * p[4])))) / (x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]);
+    T part1 = (p[4] + x * (T(2) * p[3] + x * (T(3) * p[2] + x * (T(4) * p[1] + x * T(5) * p[0])))) / (x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]);
     // part2 = (p0*x^5 + p1*x^4 + p2*x^3 + p3*x^2 + p4*x)*(4x^3+3q0*x^2+2q1*x+q2)/(x^4+q0*x^3+q1*x^2+q2*x+q3)^2
-    T part2 = (p[0] + x * (p[1] + x * (p[2] + x * (p[3] + x * p[4])))) * (x * (x * (T(4) * x + T(3) * q[0]) + T(2) * q[1]) + q[2]) / ((x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]) * (x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]));
+    T part2 = (x * (p[4] + x * (p[3] + x * (p[2] + x * (p[1] + x * p[0]))))) * (x * (x * (T(4) * x + T(3) * q[0]) + T(2) * q[1]) + q[2]) / ((x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]) * (x * (x * (x * (x + q[0]) + q[1]) + q[2]) + q[3]));
     return part1 - part2;
 }
 
@@ -94,7 +94,7 @@ double df0565(double x){
         return 1.230286920530541*std::exp(f(p_neg565, q_neg565, x)) * dfdx(p_neg565, q_neg565, x);
     }
     else{
-        return 1.230286920530541*std::exp(f(p_pos565, q_pos565, x) - x*x/2.0) * dfdx(p_pos565, q_pos565, x);
+        return 1.230286920530541*std::exp(f(p_pos565, q_pos565, x) - x*x/2.0) * (dfdx(p_pos565, q_pos565, x) - x);
     }
 }
 
@@ -133,7 +133,7 @@ float df1565(float x){
         return 1.144555647104346f*std::exp(f(p_neg1565_f, q_neg1565_f, x)) * dfdx(p_neg1565_f, q_neg1565_f, x);
     }
     else{
-        return 1.144555647104346f*std::exp(f(p_pos1565_f, q_pos1565_f, x) - x*x/2.0f) * dfdx(p_pos1565_f, q_pos1565_f, x);
+        return 1.144555647104346f*std::exp(f(p_pos1565_f, q_pos1565_f, x) - x*x/2.0f) * (dfdx(p_pos1565_f, q_pos1565_f, x) - x);
     }
 
 }
@@ -170,7 +170,7 @@ float B2(float z, float r, float s, float e, float p){
 void dB2(float z, float r, float s, float e, float p, float *d){
     // derivative of B2 respect to r, s, e, p
     // B2 = (p / r1012) * s^0.565 * ((11.26 / s) * f0565(-x) + (0.157 + 11.26 * e / r) * f1565(-x));
-    // B2 = p * A * (part1 + part2);
+    // B2 = p * A * (part1 + part2 + part3);
     // dB2_dr 
     float A = 1.0f/(1.0f + 0.012f * r);
     float dA_dr = -0.012f * A * A;
@@ -186,21 +186,25 @@ void dB2(float z, float r, float s, float e, float p, float *d){
     // part1  = s^-0.435 * 11.26 * f0565(-x);
     float part1 = std::pow(s, -0.435f) * 11.26f * f0565(-x);
     float dpart1_dr = std::pow(s, -0.435f) * 11.26f * df0565_dr;
-    float dpart1_ds = -0.435f * std::pow(s, -1.435f) * 11.26f * f0565(-x) - std::pow(s, -0.435f) * 11.26f * df0565_ds;
-    // part2 = s^0.565 * (0.157 + 11.26 * e / r) * f1565(-x);
-    float part2 = std::pow(s, 0.565f) * (0.157f + 11.26f * e / r) * f1565(-x);
-    float dpart2_dr = std::pow(s, 0.565f) * 0.157f * df1565_dr - std::pow(s, 0.565f) * 11.26f * e / (r * r) * f1565(-x) + std::pow(s, 0.565f) * 11.26f * e / r * df1565_dr;
-    float dpart2_ds = 0.565f * std::pow(s, -0.435f) * (0.157f + 11.26f * e / r) * f1565(-x) + std::pow(s, 0.565f) * (0.157f + 11.26f * e / r) * df1565_ds;
-    float dpart2_de = std::pow(s, 0.565f) * 11.26f / r * f1565(-x);
+    float dpart1_ds = -0.435f * std::pow(s, -1.435f) * 11.26f * f0565(-x) + std::pow(s, -0.435f) * 11.26f * df0565_ds;
+    // part2 = s^0.565 * 0.157 * f1565(-x);
+    float part2 = std::pow(s, 0.565f) * 0.157f * f1565(-x);
+    float dpart2_dr = std::pow(s, 0.565f) * 0.157f * df1565_dr;
+    float dpart2_ds = 0.565f * std::pow(s, -0.435f) * 0.157f * f1565(-x) + std::pow(s, 0.565f) * 0.157f * df1565_ds;
+    // part3 = s^0.565 * (11.26 * e / r) * f1565(-x);
+    float part3 = std::pow(s, 0.565f) * (11.26f * e / r) * f1565(-x);
+    float dpart3_dr =  - std::pow(s, 0.565f) * 11.26f * (e / (r * r)) * f1565(-x) + std::pow(s, 0.565f) * 11.26f * (e / r) * df1565_dr;
+    float dpart3_ds = 0.565f * std::pow(s, -0.435f) * (11.26f * e / r) * f1565(-x) + std::pow(s, 0.565f) * (11.26f * e / r) * df1565_ds;
+    float dpart3_de = std::pow(s, 0.565f) * (11.26f / r) * f1565(-x);
 
-    // dB2_dr = p * A * (dpart1_dr + dpart2_dr) + dA_dr * p * (part1 + part2);
-    d[0] = p * A * (dpart1_dr + dpart2_dr) + dA_dr * p * (part1 + part2);
-    // dB2_ds = p * A * (dpart1_ds + dpart2_ds);
-    d[1] = p * A * (dpart1_ds + dpart2_ds);
-    // dB2_de = p * A * dpart2_de;
-    d[2] = p * A * dpart2_de;
-    // dB2_dp = A * (part1 + part2);
-    d[3] = A * (part1 + part2);
+    // dB2_dr = p * A * (dpart1_dr + dpart2_dr + dpart3_dr) + dA_dr * p * (part1 + part2 + part3);
+    d[0] = p * A * (dpart1_dr + dpart2_dr + dpart3_dr) + dA_dr * p * (part1 + part2 + part3);
+    // dB2_ds = p * A * (dpart1_ds + dpart2_ds + dpart3_ds);
+    d[1] = p * A * (dpart1_ds + dpart2_ds + dpart3_ds);
+    // dB2_de = p * A * dpart3_de;
+    d[2] = p * A * dpart3_de;
+    // dB2_dp = A * (part1 + part2 + part3);
+    d[3] = A * (part1 + part2 + part3);
 
 }
 double B2(double z, double r, double s, double e, double p){
@@ -212,7 +216,7 @@ double B2(double z, double r, double s, double e, double p){
 void dB2(double z, double r, double s, double e, double p, double *d){
     // derivative of B2 respect to r, s, e, p
     // B2 = (p / r1012) * s^0.565 * ((11.26 / s) * f0565(-x) + (0.157 + 11.26 * e / r) * f1565(-x));
-    // B2 = p * A * (part1 + part2);
+    // B2 = p * A * (part1 + part2 + part3);
     // dB2_dr 
     double A = 1.0/(1.0 + 0.012 * r);
     double dA_dr = -0.012 * A * A;
@@ -228,21 +232,25 @@ void dB2(double z, double r, double s, double e, double p, double *d){
     // part1  = s^-0.435 * 11.26 * f0565(-x);
     double part1 = std::pow(s, -0.435) * 11.26 * f0565(-x);
     double dpart1_dr = std::pow(s, -0.435) * 11.26 * df0565_dr;
-    double dpart1_ds = -0.435 * std::pow(s, -1.435) * 11.26 * f0565(-x) - std::pow(s, -0.435) * 11.26 * df0565_ds;
-    // part2 = s^0.565 * (0.157 + 11.26 * e / r) * f1565(-x);
-    double part2 = std::pow(s, 0.565) * (0.157 + 11.26 * e / r) * f1565(-x);
-    double dpart2_dr = std::pow(s, 0.565) * 0.157 * df1565_dr - std::pow(s, 0.565) * 11.26 * e / (r * r) * f1565(-x) + std::pow(s, 0.565) * 11.26 * e / r * df1565_dr;
-    double dpart2_ds = 0.565 * std::pow(s, -0.435) * (0.157 + 11.26 * e / r) * f1565(-x) + std::pow(s, 0.565) * (0.157 + 11.26 * e / r) * df1565_ds;
-    double dpart2_de = std::pow(s, 0.565) * 11.26 / r * f1565(-x);
+    double dpart1_ds = -0.435 * std::pow(s, -1.435) * 11.26 * f0565(-x) + std::pow(s, -0.435) * 11.26 * df0565_ds;
+    // part2 = s^0.565 * 0.157 * f1565(-x);
+    double part2 = std::pow(s, 0.565) * 0.157 * f1565(-x);
+    double dpart2_dr = std::pow(s, 0.565) * 0.157 * df1565_dr;
+    double dpart2_ds = 0.565 * std::pow(s, -0.435) * 0.157 * f1565(-x) + std::pow(s, 0.565) * 0.157 * df1565_ds;
+    // part3 = s^0.565 * (11.26 * e / r) * f1565(-x);
+    double part3 = std::pow(s, 0.565) * (11.26 * e / r) * f1565(-x);
+    double dpart3_dr =  - std::pow(s, 0.565) * 11.26 * (e / (r * r)) * f1565(-x) + std::pow(s, 0.565) * 11.26 * (e / r) * df1565_dr;
+    double dpart3_ds = 0.565 * std::pow(s, -0.435) * (11.26 * e / r) * f1565(-x) + std::pow(s, 0.565) * (11.26 * e / r) * df1565_ds;
+    double dpart3_de = std::pow(s, 0.565) * (11.26 / r) * f1565(-x);
 
-    // dB2_dr = p * A * (dpart1_dr + dpart2_dr) + dA_dr * p * (part1 + part2);
-    d[0] = p * A * (dpart1_dr + dpart2_dr) + dA_dr * p * (part1 + part2);
-    // dB2_ds = p * A * (dpart1_ds + dpart2_ds);
-    d[1] = p * A * (dpart1_ds + dpart2_ds);
-    // dB2_de = p * A * dpart2_de;
-    d[2] = p * A * dpart2_de;
-    // dB2_dp = A * (part1 + part2);
-    d[3] = A * (part1 + part2);
+    // dB2_dr = p * A * (dpart1_dr + dpart2_dr + dpart3_dr) + dA_dr * p * (part1 + part2 + part3);
+    d[0] = p * A * (dpart1_dr + dpart2_dr + dpart3_dr) + dA_dr * p * (part1 + part2 + part3);
+    // dB2_ds = p * A * (dpart1_ds + dpart2_ds + dpart3_ds);
+    d[1] = p * A * (dpart1_ds + dpart2_ds + dpart3_ds);
+    // dB2_de = p * A * dpart3_de;
+    d[2] = p * A * dpart3_de;
+    // dB2_dp = A * (part1 + part2 + part3);
+    d[3] = A * (part1 + part2 + part3);
 
 }
 
