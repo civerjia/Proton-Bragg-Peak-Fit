@@ -1,6 +1,7 @@
 #include <cmath>
 #include <omp.h>
 #include <vector>
+#include<cstring>
 #include "mex.h"
 #include "matrix.h"
 
