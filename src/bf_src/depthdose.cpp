@@ -209,7 +209,7 @@ double B2(double z, double r, double s, double e, double p){
     // return (p / r1012) * std::pow(s, 0.565) * ((11.26 / s) * f0565(-x) + (0.157 + 11.26 * e / r) * f1565(-x));
     return (p / r1012) * std::pow(s, 0.565) * ((11.26 / s) * f0565(-x) + (0.157 + 11.26 * e / r) * f1565(-x));
 }
-double dB2(double z, double r, double s, double e, double p, double *d){
+void dB2(double z, double r, double s, double e, double p, double *d){
     // derivative of B2 respect to r, s, e, p
     // B2 = (p / r1012) * s^0.565 * ((11.26 / s) * f0565(-x) + (0.157 + 11.26 * e / r) * f1565(-x));
     // B2 = p * A * (part1 + part2);
