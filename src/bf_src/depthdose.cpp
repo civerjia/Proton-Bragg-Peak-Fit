@@ -390,9 +390,9 @@ void dD7(T depth, T R0, T sigma, T epsilon, T Phi, T a, T b, T c, T *derivative)
         dB1(depth, R0, sigma, epsilon, Phi, derivative);
         derivative[0] += T(3.0) * a * std::pow(edge - depth, 2.0) * dedge_dr + T(2.0) * b * (edge - depth) * dedge_dr + c * dedge_dr;
         derivative[1] += T(3.0) * a * std::pow(edge - depth, 2.0) * dedge_ds + T(2.0) * b * (edge - depth) * dedge_ds + c * dedge_ds;
-        derivative[4] = std::pow(R0 - depth, 3.0);
-        derivative[5] = std::pow(R0 - depth, 2.0);
-        derivative[6] = R0 - depth;
+        derivative[4] = std::pow(edge - depth, 3.0);
+        derivative[5] = std::pow(edge - depth, 2.0);
+        derivative[6] = edge - depth;
     }
     else if (edge <= depth && depth <= R0 + T(5.0) * sigma){
         dB2(depth, R0, sigma, epsilon, Phi, derivative);
